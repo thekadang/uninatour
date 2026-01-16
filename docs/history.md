@@ -2599,6 +2599,68 @@ contactPageSubtitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold
 
 ---
 
+## History #50
+**날짜**: 2025-12-17
+**사용자 질문**:
+1. 페이지 목록 메뉴에서 "숙소 안내 (니스)"를 "숙소 안내"로 변경
+2. 숙소 안내 페이지 복제 시 편집 중이던 스타일(글자 크기 등)이 그대로 유지되도록 수정
+
+### 수행한 작업
+- [x] 페이지 목록 메뉴에서 "숙소 안내 (니스)" → "숙소 안내"로 변경
+- [x] 새 숙소 추가 시에도 도시명 없이 "숙소 안내"로 표시되도록 수정
+- [x] 숙소 안내 페이지 복제 버그 분석 및 원인 파악
+- [x] duplicatePage 함수에서 accommodation 타입 복제 시 pageData(스타일 정보) 복사 로직 추가
+- [x] Playwright 테스트: 초기화 → 글자 크기 변경(25px→30px) → 복제 → 스타일 유지 확인
+
+### 문제 원인 분석
+
+**숙소 안내 복제 버그 원인**:
+```typescript
+// Before: pageData(스타일 정보) 누락
+newPage = {
+  id: newId,
+  type: 'accommodation',
+  title: pageToDuplicate.title + ' (복사)',
+  data: { index: newAccommodations.length - 1 }  // pageData 없음!
+};
+
+// After: pageData 포함하여 스타일 유지
+newPage = {
+  id: newId,
+  type: 'accommodation',
+  title: pageToDuplicate.title + ' (복사)',
+  data: {
+    index: newAccommodations.length - 1,
+    pageData: duplicatedPageData  // 스타일 정보 포함
+  }
+};
+```
+
+### 변경된 파일
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| 📝 `src/App.tsx` | 숙소 타이틀 변경 + 복제 시 pageData 복사 로직 추가 |
+| 📝 `src/hooks/usePageConfigs.ts` | 기본 페이지 설정 "숙소 안내 (니스)" → "숙소 안내" |
+| 📝 `src/data/custom-default-data.json` | 기본 데이터 타이틀 변경 |
+
+### 테스트 결과
+
+| 테스트 항목 | 결과 |
+|------------|------|
+| 페이지 목록에서 "숙소 안내" 표시 | ✅ 정상 |
+| 초기화 후 숙소 안내 페이지 정상 표시 | ✅ 정상 |
+| 글자 크기 25px→30px 변경 | ✅ 정상 |
+| 복제 후 글자 크기 30px 유지 | ✅ 정상 |
+
+### 참조한 문서
+- `src/App.tsx` - duplicatePage 함수
+- `src/hooks/usePageConfigs.ts` - 기본 페이지 설정
+- `src/components/EditableAccommodationPage.tsx` - 복제 버튼 위치 확인
+- `src/components/PageWrapper.tsx` - 페이지 컨트롤 구조
+
+---
+
 ## 롤백 안내
 
 롤백이 필요한 경우:
