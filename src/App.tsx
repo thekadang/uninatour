@@ -2,40 +2,23 @@ import { useState, useEffect } from 'react';
 import { TourData, defaultTourData } from './types/tour-data';
 import customDefaultData from './data/custom-default-data.json';
 import { BlurData, BlurRegion } from './types/blur-region';
-import { CoverPage } from './components/CoverPage';
-import { IntroductionPage } from './components/IntroductionPage';
-import { FlightInfoPage } from './components/FlightInfoPage';
-import { FlightDeparturePage } from './components/FlightDeparturePage';
-import { FlightTransitPage } from './components/FlightTransitPage';
-import { FlightArrivalPage } from './components/FlightArrivalPage';
-import { ItineraryCalendarPage } from './components/ItineraryCalendarPage';
-import { QuotationPage } from './components/QuotationPage';
-import { ProcessPage } from './components/ProcessPage';
-import { ServiceOptionsPage } from './components/ServiceOptionsPage';
-import { PaymentPage } from './components/PaymentPage';
-import { EditableAccommodationPage } from './components/EditableAccommodationPage';
-import { DetailedSchedulePage } from './components/DetailedSchedulePage';
-import { TouristSpotListPage } from './components/TouristSpotListPage';
-import { TransportationTicketPage } from './components/TransportationTicketPage';
-import { TransportationCardPage } from './components/TransportationCardPage';
-import { ContactPage } from './components/ContactPage';
 import { PasswordProtection } from './components/PasswordProtection';
-import { ChevronLeft, ChevronRight, Menu, Download, Settings, Plus, FileDown, Upload, RotateCcw, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { AppSidebar } from './components/AppSidebar';
+import { PageRenderer } from './components/PageRenderer';
+import { PageConfig } from './types/page-config';
+import { ChevronLeft, ChevronRight, Menu, Download, Settings, Plus, FileDown, Upload, RotateCcw, Eye, EyeOff, Trash2, ImageIcon } from 'lucide-react';
 import { Button } from './components/ui/button';
 import pptxgen from 'pptxgenjs';
 import html2canvas from 'html2canvas';
-import { ImageIcon } from 'lucide-react';
 
-interface PageConfig {
-  id: string;
-  type: 'cover' | 'intro' | 'flight' | 'flight-departure' | 'flight-transit' | 'flight-arrival' | 'itinerary' | 'accommodation' | 'quotation' | 'process' | 'service-options' | 'payment' | 'detailed-schedule' | 'tourist-spot' | 'transportation-ticket' | 'transportation-card' | 'contact';
-  title: string;
-  data?: any;
-}
+// Hooks
+import { useTourData } from './hooks/useTourData';
+import { usePageConfigs } from './hooks/usePageConfigs';
+import { useBlurData } from './hooks/useBlurData';
+
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
   const [showNav, setShowNav] = useState(false);
   const [showFileMenu, setShowFileMenu] = useState(false);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -43,99 +26,19 @@ export default function App() {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [blurModePages, setBlurModePages] = useState<Set<string>>(new Set());
-  
-  // Load saved data from localStorage or use default
-  const [tourData, setTourData] = useState<TourData>(() => {
-    try {
-      const saved = localStorage.getItem('tourData');
-      return saved ? JSON.parse(saved) : defaultTourData;
-    } catch (error) {
-      console.error('Failed to load saved data:', error);
-      return defaultTourData;
-    }
-  });
-  
-  // Load blur data from localStorage
-  const [blurData, setBlurData] = useState<BlurData>(() => {
-    try {
-      const saved = localStorage.getItem('blurData');
-      return saved ? JSON.parse(saved) : {};
-    } catch (error) {
-      console.error('Failed to load blur data:', error);
-      return {};
-    }
-  });
 
-  // Save blur data to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('blurData', JSON.stringify(blurData));
-  }, [blurData]);
-
-  // Save tourData to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('tourData', JSON.stringify(tourData));
-  }, [tourData]);
-
-  const [pageConfigs, setPageConfigs] = useState<PageConfig[]>(() => {
-    // 마이그레이션 함수: 새로운 페이지 타입이 누락된 경우 자동 추가
-    const migratePageConfigs = (configs: PageConfig[]): PageConfig[] => {
-      let migrated = [...configs];
-
-      // service-options 페이지가 없으면 process 다음에 추가
-      const hasServiceOptions = migrated.some(c => c.type === 'service-options');
-      if (!hasServiceOptions) {
-        const processIndex = migrated.findIndex(c => c.type === 'process');
-        if (processIndex !== -1) {
-          migrated.splice(processIndex + 1, 0, {
-            id: '10-1',
-            type: 'service-options',
-            title: '서비스 옵션'
-          });
-        }
-      }
-
-      return migrated;
-    };
-
-    try {
-      const saved = localStorage.getItem('pageConfigs');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const migrated = migratePageConfigs(parsed);
-        // 마이그레이션이 수행되었으면 localStorage 업데이트
-        if (JSON.stringify(parsed) !== JSON.stringify(migrated)) {
-          localStorage.setItem('pageConfigs', JSON.stringify(migrated));
-        }
-        return migrated;
-      }
-    } catch (error) {
-      console.error('Failed to load saved page configs:', error);
-    }
-    return [
-      { id: '1', type: 'cover', title: '표지' },
-      { id: '2', type: 'intro', title: '여행 소개' },
-      { id: '10', type: 'process', title: '프로세스' },
-      { id: '10-1', type: 'service-options', title: '서비스 옵션' },
-      { id: '3', type: 'flight-departure', title: '항공편 (출발)' },
-      { id: '4', type: 'flight-transit', title: '항공편 (중간이동)' },
-      { id: '5', type: 'flight-arrival', title: '항공편 (도착)' },
-      { id: '6', type: 'itinerary', title: '여행 일정' },
-      { id: '7', type: 'accommodation', title: '숙소 안내', data: { index: 0 } },
-      { id: '6-1', type: 'detailed-schedule', title: '세부 일정 (DAY 1)', data: { dayNumber: 1 } },
-      { id: '6-4', type: 'tourist-spot', title: '관광지 리스트 (DAY 1)', data: { dayNumber: 1 } },
-      { id: '12', type: 'transportation-ticket', title: '교통편 안내' },
-      { id: '13', type: 'transportation-card', title: '교통카드 안내' },
-      { id: '9', type: 'quotation', title: '견적' },
-      { id: '11', type: 'payment', title: '결제 안내' },
-      { id: '14', type: 'contact', title: '문의 하기' },
-    ];
-  });
-
-  // Save pageConfigs to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('pageConfigs', JSON.stringify(pageConfigs));
-  }, [pageConfigs]);
+  // 통합 커스텀 훅 사용
+  const { tourData, setTourData, updateTourData, resetTourData } = useTourData();
+  const { blurData, blurModePages, toggleBlurMode, addBlurRegion, removeBlurRegion, clearBlurModePages, resetBlurData } = useBlurData();
+  const {
+    pageConfigs,
+    setPageConfigs,
+    currentPage,
+    setCurrentPage,
+    duplicatePage: duplicatePageConfig,
+    reorderPages,
+    resetPageConfigs
+  } = usePageConfigs();
 
   // Save current state as default
   const saveAsDefault = async () => {
@@ -143,19 +46,19 @@ export default function App() {
       // First save to localStorage as backup
       localStorage.setItem('tourData', JSON.stringify(tourData));
       localStorage.setItem('pageConfigs', JSON.stringify(pageConfigs));
-      
+
       // Create JSON data to download
       const dataToExport = {
         tourData,
         pageConfigs,
         exportedAt: new Date().toISOString()
       };
-      
+
       // Create a blob from the JSON data
       const jsonString = JSON.stringify(dataToExport, null, 2);
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      
+
       // Create a download link
       const link = document.createElement('a');
       link.href = url;
@@ -164,7 +67,7 @@ export default function App() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       alert('✅ 현재 상태가 JSON 파일로 저장되었습니다!\n\n이 파일을 개발자에게 전달하면 기본값으로 설정할 수 있습니다.\n\n또는 다른 브라우저에서 "설정 불러오기" 버튼으로 이 파일을 업로드하세요.');
     } catch (error) {
       console.error('Failed to save data:', error);
@@ -180,12 +83,12 @@ export default function App() {
     input.onchange = (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
           const data = JSON.parse(event.target?.result as string);
-          
+
           if (data.tourData) {
             // 기본값과 병합: 누락된 필드는 기본값 사용, 저장된 필드는 불러온 값 사용
             const mergedTourData = { ...defaultTourData, ...data.tourData };
@@ -349,615 +252,26 @@ export default function App() {
     input.click();
   };
 
-  const renderPage = (config: PageConfig) => {
-    switch (config.type) {
-      case 'cover':
-        // 날짜 관련 필드는 항상 tourData에서 가져옴 (여행소개 페이지에서 변경 시 동기화)
-        const coverPageData = {
-          ...(config.data?.pageData || tourData),
-          startDate: tourData.startDate,
-          endDate: tourData.endDate,
-          duration: tourData.duration,
-        };
-        return (
-          <CoverPage
-            key={config.id}
-            data={coverPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...coverPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'intro':
-        // 날짜 관련 필드는 항상 tourData에서 가져옴 (날짜 동기화)
-        // 공유 필드는 항상 tourData에서 가져오고, 페이지별 스타일은 pageData에서 가져옴
-        const introPageData = {
-          ...(config.data?.pageData || tourData),
-          // 공유 필드: 항상 tourData에서 동기화
-          startDate: tourData.startDate,
-          endDate: tourData.endDate,
-          nights: tourData.nights,
-          days: tourData.days,
-          travelParty: tourData.travelParty,
-          duration: tourData.duration,
-        };
-        return (
-          <IntroductionPage
-            key={config.id}
-            data={introPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              // 공유 필드가 업데이트되면 전역 tourData도 함께 업데이트
-              // 일정 관련 + 참가자 정보는 여러 페이지에서 공유됨
-              const sharedFields = ['startDate', 'endDate', 'nights', 'days', 'totalDays', 'travelParty'];
-              const hasSharedFieldUpdate = Object.keys(updated).some(key => sharedFields.includes(key));
-
-              if (hasSharedFieldUpdate) {
-                // 전역 tourData 업데이트
-                setTourData({ ...tourData, ...updated });
-              }
-              
-              // 페이지별 데이터 업데이트
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...introPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'flight':
-        const flightPageData = config.data?.pageData || tourData;
-        return (
-          <FlightInfoPage
-            key={config.id}
-            data={flightPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...flightPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'flight-departure':
-        const flightDepPageData = config.data?.pageData || tourData;
-        return (
-          <FlightDeparturePage
-            key={config.id}
-            data={flightDepPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...flightDepPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'flight-transit':
-        const flightTransitPageData = config.data?.pageData || tourData;
-        return (
-          <FlightTransitPage
-            key={config.id}
-            data={flightTransitPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...flightTransitPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'flight-arrival':
-        const flightArrPageData = config.data?.pageData || tourData;
-        return (
-          <FlightArrivalPage
-            key={config.id}
-            data={flightArrPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...flightArrPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'itinerary':
-        // ItineraryCalendarPage는 항상 전역 tourData를 사용 (날짜 연동을 위해)
-        // 날짜 관련 필드는 항상 tourData에서 가져옴 (여행소개 페이지에서 변경 시 동기화)
-        const itineraryPageData = {
-          ...tourData,
-          ...(config.data?.pageData || {}),
-          // 공유 필드: 항상 tourData에서 동기화
-          startDate: tourData.startDate,
-          endDate: tourData.endDate,
-          duration: tourData.duration,
-          nights: tourData.nights,
-          days: tourData.days,
-        };
-        return (
-          <ItineraryCalendarPage
-            key={config.id}
-            data={itineraryPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              // 전역 tourData 업데이트 (일정 데이터)
-              setTourData({ ...tourData, ...updated });
-              
-              // 페이지별 데이터도 업데이트
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...itineraryPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'accommodation':
-        const accIndex = config.data?.index ?? 0;
-        // 페이지별 독립 데이터 사용: pageData가 있으면 그것을 사용, 없으면 tourData에서 가져옴
-        const accPageData = config.data?.pageData || tourData;
-        const accHotel = config.data?.pageData?.accommodations?.[accIndex] || tourData.accommodations[accIndex];
-        return (
-          <EditableAccommodationPage
-            key={config.id}
-            hotel={accHotel}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              // 페이지별 데이터에 숙소 정보 업데이트 (함수형 업데이트로 최신 state 참조)
-              setPageConfigs(prevConfigs => {
-                const newPages = [...prevConfigs];
-                const currentAccPageData = newPages[currentPage].data?.pageData || tourData;
-                const currentAccommodations = currentAccPageData.accommodations
-                  ? [...currentAccPageData.accommodations]
-                  : [...tourData.accommodations];
-                currentAccommodations[accIndex] = updated;
-                newPages[currentPage] = {
-                  ...newPages[currentPage],
-                  data: {
-                    ...newPages[currentPage].data,
-                    pageData: { ...currentAccPageData, accommodations: currentAccommodations }
-                  }
-                };
-                return newPages;
-              });
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.filter(p => p.type === 'accommodation').length > 1}
-            data={accPageData}
-            onStyleChange={(updated) => {
-              // 함수형 업데이트로 최신 state 참조 (onUpdate와의 race condition 방지)
-              setPageConfigs(prevConfigs => {
-                const newPages = [...prevConfigs];
-                const currentAccPageData = newPages[currentPage].data?.pageData || tourData;
-                newPages[currentPage] = {
-                  ...newPages[currentPage],
-                  data: {
-                    ...newPages[currentPage].data,
-                    pageData: { ...currentAccPageData, ...updated }
-                  }
-                };
-                return newPages;
-              });
-            }}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'quotation':
-        // 공유 필드는 항상 tourData에서 가져오고, 페이지별 스타일은 pageData에서 가져옴
-        const quotationPageData = {
-          ...(config.data?.pageData || tourData),
-          // 공유 필드: 항상 tourData에서 동기화
-          startDate: tourData.startDate,
-          endDate: tourData.endDate,
-          nights: tourData.nights,
-          days: tourData.days,
-          travelParty: tourData.travelParty,
-        };
-        return (
-          <QuotationPage
-            key={config.id}
-            data={quotationPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...quotationPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'process':
-        const processPageData = config.data?.pageData || tourData;
-        return (
-          <ProcessPage
-            key={config.id}
-            data={processPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...processPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'service-options':
-        const serviceOptionsPageData = config.data?.pageData || tourData;
-        return (
-          <ServiceOptionsPage
-            key={config.id}
-            data={serviceOptionsPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...serviceOptionsPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'payment':
-        const paymentPageData = config.data?.pageData || tourData;
-        return (
-          <PaymentPage
-            key={config.id}
-            data={paymentPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...paymentPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'detailed-schedule':
-        const dayNum = config.data?.dayNumber ?? 1;
-        const detailedSchedulePageData = config.data?.pageData || tourData;
-        return (
-          <DetailedSchedulePage
-            key={config.id}
-            data={detailedSchedulePageData}
-            dayNumber={dayNum}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...detailedSchedulePageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.filter(p => p.type === 'detailed-schedule').length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'tourist-spot':
-        // 페이지별 독립 데이터 사용
-        const touristSpotPageData = config.data?.pageData || tourData;
-        const touristDayNum = config.data?.dayNumber ?? 1;
-        return (
-          <TouristSpotListPage
-            key={config.id}
-            data={touristSpotPageData}
-            dayNumber={touristDayNum}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...touristSpotPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.filter(p => p.type === 'tourist-spot').length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'transportation-ticket':
-        // 페이지별 독립 데이터 사용
-        const ticketPageData = config.data?.pageData || tourData;
-        return (
-          <TransportationTicketPage
-            key={config.id}
-            data={ticketPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...ticketPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'transportation-card':
-        // 페이지별 독립 데이터 사용
-        const cardPageData = config.data?.pageData || tourData;
-        return (
-          <TransportationCardPage
-            key={config.id}
-            data={cardPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...cardPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      case 'contact':
-        const contactPageData = config.data?.pageData || tourData;
-        return (
-          <ContactPage
-            key={config.id}
-            data={contactPageData}
-            isEditMode={isEditMode}
-            onUpdate={(updated) => {
-              const newPages = [...pageConfigs];
-              newPages[currentPage] = {
-                ...newPages[currentPage],
-                data: {
-                  ...newPages[currentPage].data,
-                  pageData: { ...contactPageData, ...updated }
-                }
-              };
-              setPageConfigs(newPages);
-            }}
-            onDuplicate={() => duplicatePage(currentPage)}
-            onDelete={() => deletePage(currentPage)}
-            canDelete={pageConfigs.length > 1}
-            pageId={config.id}
-            isBlurMode={blurModePages.has(config.id)}
-            blurRegions={blurData[config.id] || []}
-            onToggleBlurMode={() => handleToggleBlurMode(config.id)}
-            onAddBlurRegion={(region) => handleAddBlurRegion(config.id, region)}
-            onRemoveBlurRegion={(regionId) => handleRemoveBlurRegion(config.id, regionId)}
-          />
-        );
-      default:
-        return null;
-    }
-  };
 
   const duplicatePage = (index: number) => {
     const pageToDuplicate = pageConfigs[index];
-    const newId = Date.now().toString();
-    
+    const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     let newPage: PageConfig;
     if (pageToDuplicate.type === 'accommodation') {
       const accIndex = pageToDuplicate.data?.index ?? 0;
-      // pageData에서 먼저 찾고, 없으면 tourData에서 찾기 (편집 중인 데이터 반영)
-      const pageData = pageToDuplicate.data?.pageData;
-      const hotelToDuplicate = pageData?.accommodations?.[accIndex] || tourData.accommodations[accIndex];
+      const hotelToDuplicate = pageToDuplicate.data?.pageData?.accommodations?.[accIndex] || tourData.accommodations[accIndex];
       const newAccommodations = [...tourData.accommodations];
-      // 깊은 복사를 위해 JSON.parse(JSON.stringify()) 사용
       const duplicatedHotel = JSON.parse(JSON.stringify(hotelToDuplicate));
       duplicatedHotel.name = duplicatedHotel.name + ' (복사)';
       newAccommodations.push(duplicatedHotel);
       setTourData({ ...tourData, accommodations: newAccommodations });
 
-      // pageData도 깊은 복사하여 스타일 정보 유지
-      const duplicatedPageData = pageData
-        ? JSON.parse(JSON.stringify(pageData))
+      // pageData가 있는 경우에만 복제하여 유지, 없으면 null 유지
+      const duplicatedPageData = pageToDuplicate.data?.pageData
+        ? JSON.parse(JSON.stringify(pageToDuplicate.data.pageData))
         : null;
 
-      // 복제된 pageData에서 accommodations 배열도 업데이트
       if (duplicatedPageData) {
         duplicatedPageData.accommodations = duplicatedPageData.accommodations || [...tourData.accommodations];
         duplicatedPageData.accommodations.push(duplicatedHotel);
@@ -974,19 +288,14 @@ export default function App() {
       };
     } else if (pageToDuplicate.type === 'detailed-schedule') {
       const currentDayNumber = pageToDuplicate.data?.dayNumber ?? 1;
-
-      // pageData에서 먼저 찾고, 없으면 tourData에서 찾기 (편집 중인 데이터 반영)
-      const pageData = pageToDuplicate.data?.pageData;
-      const scheduleToDuplicate = pageData?.detailedSchedules?.find((s: any) => s.day === currentDayNumber)
+      const scheduleToDuplicate = pageToDuplicate.data?.pageData?.detailedSchedules?.find((s: any) => s.day === currentDayNumber)
         || tourData.detailedSchedules.find(s => s.day === currentDayNumber);
 
-      // 다음 day number 찾기 - pageConfigs에 있는 모든 세부 일정 페이지의 dayNumber 확인
       const existingDayNumbers = pageConfigs
         .filter(p => p.type === 'detailed-schedule')
         .map(p => p.data?.dayNumber ?? 0);
       const newDayNumber = Math.max(...existingDayNumbers, 0) + 1;
 
-      // 스케줄 데이터 깊은 복사
       const duplicatedSchedule = scheduleToDuplicate
         ? JSON.parse(JSON.stringify(scheduleToDuplicate))
         : { day: newDayNumber, title: `DAY ${newDayNumber}`, colorTheme: 'pink', scheduleItems: [] };
@@ -994,17 +303,14 @@ export default function App() {
       duplicatedSchedule.day = newDayNumber;
       duplicatedSchedule.title = `DAY ${newDayNumber}`;
 
-      // tourData에 새 스케줄 추가
       const newSchedules = [...tourData.detailedSchedules, duplicatedSchedule];
       setTourData({ ...tourData, detailedSchedules: newSchedules });
 
-      // pageData도 복제하여 편집 내용 유지
-      const duplicatedPageData = pageData
-        ? JSON.parse(JSON.stringify(pageData))
+      const duplicatedPageData = pageToDuplicate.data?.pageData
+        ? JSON.parse(JSON.stringify(pageToDuplicate.data.pageData))
         : null;
 
       if (duplicatedPageData) {
-        // pageData의 detailedSchedules도 업데이트
         duplicatedPageData.detailedSchedules = duplicatedPageData.detailedSchedules || [];
         duplicatedPageData.detailedSchedules.push(duplicatedSchedule);
       }
@@ -1022,18 +328,14 @@ export default function App() {
       const currentDayNumber = pageToDuplicate.data?.dayNumber ?? 1;
       const touristSpots = tourData.touristSpots || [];
 
-      // pageData에서 먼저 찾고, 없으면 tourData에서 찾기 (편집 중인 데이터 반영)
-      const pageData = pageToDuplicate.data?.pageData;
-      const spotToDuplicate = pageData?.touristSpots?.find((s: any) => s.day === currentDayNumber)
+      const spotToDuplicate = pageToDuplicate.data?.pageData?.touristSpots?.find((s: any) => s.day === currentDayNumber)
         || touristSpots.find(s => s.day === currentDayNumber);
 
-      // 다음 day number 찾기 - pageConfigs에 있는 모든 관광지 리스트 페이지의 dayNumber 확인
       const existingDayNumbers = pageConfigs
         .filter(p => p.type === 'tourist-spot')
         .map(p => p.data?.dayNumber ?? 0);
       const newDayNumber = Math.max(...existingDayNumbers, 0) + 1;
 
-      // 스케줄 데이터 깊은 복사
       const duplicatedSpot = spotToDuplicate
         ? JSON.parse(JSON.stringify(spotToDuplicate))
         : { day: newDayNumber, title: `DAY ${newDayNumber}`, colorTheme: 'pink', scheduleItems: [] };
@@ -1044,9 +346,8 @@ export default function App() {
       const newSpots = [...touristSpots, duplicatedSpot];
       setTourData({ ...tourData, touristSpots: newSpots });
 
-      // pageData도 복제하여 편집 내용 유지
-      const duplicatedPageData = pageData
-        ? JSON.parse(JSON.stringify(pageData))
+      const duplicatedPageData = pageToDuplicate.data?.pageData
+        ? JSON.parse(JSON.stringify(pageToDuplicate.data.pageData))
         : null;
 
       if (duplicatedPageData) {
@@ -1064,10 +365,11 @@ export default function App() {
         }
       };
     } else {
-      // 다른 모든 페이지 타입: pageData를 깊은 복사
-      const pageDataToDuplicate = pageToDuplicate.data?.pageData || tourData;
-      const duplicatedPageData = JSON.parse(JSON.stringify(pageDataToDuplicate));
-      
+      // 다른 모든 페이지 타입: pageData가 있는 경우에만 복제, 없으면 null 유지 (tourData 참조)
+      const duplicatedPageData = pageToDuplicate.data?.pageData
+        ? JSON.parse(JSON.stringify(pageToDuplicate.data.pageData))
+        : null;
+
       newPage = {
         ...pageToDuplicate,
         id: newId,
@@ -1078,7 +380,7 @@ export default function App() {
         }
       };
     }
-    
+
     const newPages = [...pageConfigs];
     newPages.splice(index + 1, 0, newPage);
     setPageConfigs(newPages);
@@ -1087,14 +389,14 @@ export default function App() {
 
   const deletePage = (index: number) => {
     if (pageConfigs.length <= 1) return;
-    
+
     const pageToDelete = pageConfigs[index];
-    
+
     if (pageToDelete.type === 'accommodation') {
       const accIndex = pageToDelete.data?.index ?? 0;
       const newAccommodations = tourData.accommodations.filter((_, i) => i !== accIndex);
       setTourData({ ...tourData, accommodations: newAccommodations });
-      
+
       // 다른 숙소 페이지들의 인덱스 업데이트
       const newPages = pageConfigs
         .filter((_, i) => i !== index)
@@ -1109,7 +411,7 @@ export default function App() {
       const dayNumber = pageToDelete.data?.dayNumber ?? 1;
       const newSchedules = tourData.detailedSchedules.filter(s => s.day !== dayNumber);
       setTourData({ ...tourData, detailedSchedules: newSchedules });
-      
+
       const newPages = pageConfigs.filter((_, i) => i !== index);
       setPageConfigs(newPages);
     } else if (pageToDelete.type === 'tourist-spot') {
@@ -1117,14 +419,14 @@ export default function App() {
       const touristSpots = tourData.touristSpots || [];
       const newSpots = touristSpots.filter(s => s.day !== dayNumber);
       setTourData({ ...tourData, touristSpots: newSpots });
-      
+
       const newPages = pageConfigs.filter((_, i) => i !== index);
       setPageConfigs(newPages);
     } else {
       const newPages = pageConfigs.filter((_, i) => i !== index);
       setPageConfigs(newPages);
     }
-    
+
     if (currentPage >= pageConfigs.length - 1) {
       setCurrentPage(Math.max(0, currentPage - 1));
     }
@@ -1158,7 +460,7 @@ export default function App() {
     newPages.splice(dragOverIndex, 0, draggedPage);
 
     setPageConfigs(newPages);
-    
+
     // 현재 보고 있는 페이지 추적
     if (currentPage === draggedIndex) {
       setCurrentPage(dragOverIndex);
@@ -1178,32 +480,15 @@ export default function App() {
 
   // Blur management functions
   const handleToggleBlurMode = (pageId: string) => {
-    setBlurModePages(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(pageId)) {
-        newSet.delete(pageId);
-      } else {
-        newSet.add(pageId);
-      }
-      return newSet;
-    });
+    toggleBlurMode(pageId);
   };
 
   const handleAddBlurRegion = (pageId: string, region: Omit<BlurRegion, 'id' | 'pageId'>) => {
-    const regionId = Date.now().toString();
-    const newRegion: BlurRegion = { ...region, id: regionId, pageId };
-    
-    setBlurData(prev => ({
-      ...prev,
-      [pageId]: [...(prev[pageId] || []), newRegion]
-    }));
+    addBlurRegion(pageId, region);
   };
 
   const handleRemoveBlurRegion = (pageId: string, regionId: string) => {
-    setBlurData(prev => ({
-      ...prev,
-      [pageId]: (prev[pageId] || []).filter(r => r.id !== regionId)
-    }));
+    removeBlurRegion(pageId, regionId);
   };
 
   const addAccommodationPage = () => {
@@ -1278,24 +563,20 @@ export default function App() {
           const totalImages = images.length;
 
           const imagePromises = Array.from(images).map((img, index) => {
-            // lazy loading 비활성화하고 강제 로드
             if (img.loading === 'lazy') {
               img.loading = 'eager';
-              // src를 다시 설정하여 강제 로드 트리거
               const currentSrc = img.src;
               img.src = '';
               img.src = currentSrc;
               console.log(`[PDF] 이미지 ${index + 1}/${totalImages} lazy→eager 전환`);
             }
 
-            // 이미 로드 완료된 이미지
             if (img.complete && img.naturalWidth > 0) {
               loadedCount++;
               console.log(`[PDF] 이미지 ${index + 1}/${totalImages} 이미 로드됨`);
               return Promise.resolve();
             }
 
-            // 로드 대기 (개별 타임아웃 3초)
             return new Promise<void>((imgResolve) => {
               const timeout = setTimeout(() => {
                 console.log(`[PDF] 이미지 ${index + 1}/${totalImages} 타임아웃`);
@@ -1311,7 +592,7 @@ export default function App() {
               img.onerror = () => {
                 clearTimeout(timeout);
                 console.log(`[PDF] 이미지 ${index + 1}/${totalImages} 로드 실패`);
-                imgResolve(); // 에러여도 계속 진행
+                imgResolve();
               };
             });
           });
@@ -1320,14 +601,13 @@ export default function App() {
             console.log(`[PDF] 총 ${loadedCount}/${totalImages} 이미지 로드됨`);
             resolve();
           });
-        }, 100); // DOM 업데이트 대기
+        }, 100);
       });
     };
 
     await waitForImages();
     console.log('[PDF] 이미지 로드 완료');
 
-    // 추가 대기 시간 (이미지 렌더링 완료) - 2초로 증가
     await new Promise(resolve => setTimeout(resolve, 2000));
     console.log('[PDF] window.print() 호출...');
 
@@ -1342,6 +622,19 @@ export default function App() {
     console.log('[PDF] 인쇄 모드 종료');
   };
 
+  const handleReset = () => {
+    if (confirm('정말 초기화하시겠습니까?\n\n불러온 모든 데이터가 삭제되고 커스텀 기본값으로 초기화됩니다.')) {
+      localStorage.setItem('tourData', JSON.stringify(customDefaultData.tourData));
+      if (customDefaultData.pageConfigs) {
+        localStorage.setItem('pageConfigs', JSON.stringify(customDefaultData.pageConfigs));
+      } else {
+        localStorage.removeItem('pageConfigs');
+      }
+      localStorage.removeItem('blurData');
+      window.location.reload();
+    }
+  };
+
   // 스크롤 위치 감지
   useEffect(() => {
     const handleScroll = () => {
@@ -1349,7 +642,7 @@ export default function App() {
       const documentHeight = document.documentElement.scrollHeight;
       const scrollTop = window.scrollY;
       const scrollBottom = scrollTop + windowHeight;
-      
+
       // 페이지 하단에서 100px 이내면 불투명하게
       const isNearBottom = documentHeight - scrollBottom < 100;
       setIsAtBottom(isNearBottom);
@@ -1377,17 +670,32 @@ export default function App() {
             </filter>
           </defs>
         </svg>
-        
+
         {pageConfigs.map((config, index) => {
           // Generate page-specific class based on type
           const pageClass = `${config.type}-page`;
-          
+
           return (
-            <div 
-              key={config.id} 
+            <div
+              key={config.id}
               className={`print-page print:break-after-page ${pageClass}`}
             >
-              {renderPage(config)}
+              <PageRenderer
+                config={config}
+                index={index}
+                tourData={tourData}
+                pageConfigs={pageConfigs}
+                isEditMode={isEditMode}
+                blurModePages={blurModePages}
+                blurData={blurData}
+                setTourData={setTourData}
+                setPageConfigs={setPageConfigs}
+                duplicatePage={duplicatePage}
+                deletePage={deletePage}
+                handleToggleBlurMode={handleToggleBlurMode}
+                handleAddBlurRegion={handleAddBlurRegion}
+                handleRemoveBlurRegion={handleRemoveBlurRegion}
+              />
             </div>
           );
         })}
@@ -1406,190 +714,59 @@ export default function App() {
         </defs>
       </svg>
 
-      {/* File Menu Button - 좌측 상단 */}
-      <button
-        onClick={() => setShowFileMenu(!showFileMenu)}
-        className="fixed top-4 left-4 z-50 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow border border-cyan-200 print:hidden"
-      >
-        <Menu className="w-5 h-5 text-cyan-600" />
-      </button>
-
-      {/* File Menu Dropdown */}
-      {showFileMenu && (
-        <div className="fixed top-16 left-4 z-50 bg-white rounded-lg shadow-xl border border-cyan-200 p-2 w-52 print:hidden">
-          <button
-            onClick={() => {
-              handlePrint();
-              setShowFileMenu(false);
-            }}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-cyan-50 text-gray-700 transition-colors flex items-center gap-3"
-          >
-            <FileDown className="w-5 h-5 text-cyan-600" />
-            <span>PDF 저장</span>
-          </button>
-          <button
-            onClick={() => {
-              saveAsDefault();
-              setShowFileMenu(false);
-            }}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-green-50 text-gray-700 transition-colors flex items-center gap-3"
-          >
-            <RotateCcw className="w-5 h-5 text-green-600" />
-            <span>사이트저장</span>
-          </button>
-          <button
-            onClick={() => {
-              loadSettings();
-              setShowFileMenu(false);
-            }}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-gray-700 transition-colors flex items-center gap-3"
-          >
-            <Upload className="w-5 h-5 text-blue-600" />
-            <span>사이트 불러오기</span>
-          </button>
-          <div className="border-t border-gray-200 my-2"></div>
-          <button
-            onClick={() => {
-              saveCurrentPage();
-              setShowFileMenu(false);
-            }}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-purple-50 text-gray-700 transition-colors flex items-center gap-3"
-          >
-            <Download className="w-5 h-5 text-purple-600" />
-            <span>페이지저장</span>
-          </button>
-          <button
-            onClick={() => {
-              loadPageAtCurrent();
-              setShowFileMenu(false);
-            }}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 text-gray-700 transition-colors flex items-center gap-3"
-          >
-            <Upload className="w-5 h-5 text-orange-600" />
-            <span>페이지 불러오기</span>
-          </button>
-          <div className="border-t border-gray-200 my-2"></div>
-          <button
-            onClick={() => {
-              if (confirm('정말 초기화하시겠습니까?\n\n불러온 모든 데이터가 삭제되고 커스텀 기본값으로 초기화됩니다.')) {
-                // 커스텀 기본값으로 초기화 (JSON 파일에서 로드)
-                localStorage.setItem('tourData', JSON.stringify(customDefaultData.tourData));
-                // pageConfigs도 JSON 파일에서 로드 (스타일 정보 포함)
-                if (customDefaultData.pageConfigs) {
-                  localStorage.setItem('pageConfigs', JSON.stringify(customDefaultData.pageConfigs));
-                } else {
-                  localStorage.removeItem('pageConfigs');
-                }
-                localStorage.removeItem('blurData');
-                window.location.reload();
-              }
-              setShowFileMenu(false);
-            }}
-            className="w-full text-left px-4 py-3 rounded-lg hover:bg-red-50 text-gray-700 transition-colors flex items-center gap-3"
-          >
-            <Trash2 className="w-5 h-5 text-red-600" />
-            <span>초기화</span>
-          </button>
-        </div>
-      )}
-
-      {/* Edit Mode Toggle */}
-      <button
-        onClick={() => {
-          const newEditMode = !isEditMode;
-          setIsEditMode(newEditMode);
-          // 편집 모드를 끌 때 모든 블러 모드도 함께 끄기
-          if (!newEditMode) {
-            setBlurModePages(new Set());
-          }
+      {/* Navigation & Menu System */}
+      <AppSidebar
+        currentPage={currentPage}
+        pageConfigs={pageConfigs}
+        showFileMenu={showFileMenu}
+        showNav={showNav}
+        isEditMode={isEditMode}
+        blurModePages={blurModePages}
+        draggedIndex={draggedIndex}
+        dragOverIndex={dragOverIndex}
+        setShowFileMenu={setShowFileMenu}
+        setShowNav={setShowNav}
+        setIsEditMode={(edit) => {
+          setIsEditMode(edit);
+          if (!edit) clearBlurModePages();
         }}
-        className={`fixed top-4 left-20 z-50 px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 print:hidden ${
-          isEditMode
-            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white'
-            : 'bg-white text-gray-700 border border-gray-300'
-        }`}
-      >
-        <Settings className="w-5 h-5" />
-        <span>{isEditMode ? '편집 모드' : '보기 모드'}</span>
-      </button>
-
-      {/* Blur Mode Toggle - 보기 모드에서만 표시 */}
-      {!isEditMode && (
-        <button
-          onClick={() => {
-            const currentPageId = pageConfigs[currentPage].id;
-            handleToggleBlurMode(currentPageId);
-          }}
-          className={`fixed top-4 left-64 z-50 px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 print:hidden ${
-            blurModePages.has(pageConfigs[currentPage].id)
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-              : 'bg-white text-gray-700 border border-gray-300'
-          }`}
-        >
-          {blurModePages.has(pageConfigs[currentPage].id) ? (
-            <EyeOff className="w-5 h-5" />
-          ) : (
-            <Eye className="w-5 h-5" />
-          )}
-          <span>{blurModePages.has(pageConfigs[currentPage].id) ? '블러 모드' : '블러 설정'}</span>
-        </button>
-      )}
-
-      {/* Page Navigation Menu - 우측 상단 */}
-      <button
-        onClick={() => setShowNav(!showNav)}
-        className="fixed top-4 right-4 z-50 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow border border-cyan-200 print:hidden"
-      >
-        <Menu className="w-5 h-5 text-cyan-600" />
-      </button>
-
-      {showNav && (
-        <div className="fixed top-16 right-4 z-50 bg-white rounded-lg shadow-xl border border-cyan-200 p-4 w-56 max-h-[80vh] overflow-y-auto print:hidden">
-          <div className="space-y-2">
-            {pageConfigs.map((page, index) => (
-              <button
-                key={page.id}
-                draggable={isEditMode}
-                onDragStart={isEditMode ? () => handleDragStart(index) : undefined}
-                onDragOver={isEditMode ? (e) => handleDragOver(e, index) : undefined}
-                onDragEnd={isEditMode ? handleDragEnd : undefined}
-                onDragLeave={isEditMode ? handleDragLeave : undefined}
-                onClick={() => {
-                  setCurrentPage(index);
-                  setShowNav(false);
-                }}
-                className={`w-full text-left px-4 py-2 rounded-lg transition-all ${
-                  isEditMode ? 'cursor-move' : 'cursor-pointer'
-                } ${
-                  currentPage === index
-                    ? 'bg-cyan-500 text-white'
-                    : 'hover:bg-cyan-50 text-gray-700'
-                } ${
-                  draggedIndex === index && isEditMode
-                    ? 'opacity-50 scale-95'
-                    : ''
-                } ${
-                  dragOverIndex === index && draggedIndex !== index && isEditMode
-                    ? 'border-2 border-cyan-400 border-dashed'
-                    : ''
-                }`}
-              >
-                {index + 1}. {page.title}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+        setCurrentPage={setCurrentPage}
+        handlePrint={handlePrint}
+        saveAsDefault={saveAsDefault}
+        loadSettings={loadSettings}
+        saveCurrentPage={saveCurrentPage}
+        loadPageAtCurrent={loadPageAtCurrent}
+        handleReset={handleReset}
+        handleToggleBlurMode={handleToggleBlurMode}
+        handleDragStart={handleDragStart}
+        handleDragOver={handleDragOver}
+        handleDragEnd={handleDragEnd}
+        handleDragLeave={handleDragLeave}
+      />
 
       {/* Page Content */}
       <div className="max-w-4xl mx-auto pb-32 px-4 md:px-6 lg:px-0">
-        {renderPage(pageConfigs[currentPage])}
+        <PageRenderer
+          config={pageConfigs[currentPage]}
+          index={currentPage}
+          tourData={tourData}
+          pageConfigs={pageConfigs}
+          isEditMode={isEditMode}
+          blurModePages={blurModePages}
+          blurData={blurData}
+          setTourData={setTourData}
+          setPageConfigs={setPageConfigs}
+          duplicatePage={duplicatePage}
+          deletePage={deletePage}
+          handleToggleBlurMode={handleToggleBlurMode}
+          handleAddBlurRegion={handleAddBlurRegion}
+          handleRemoveBlurRegion={handleRemoveBlurRegion}
+        />
       </div>
 
       {/* Page Navigation */}
-      <div className={`fixed bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 rounded-full shadow-xl px-4 md:px-6 py-2 md:py-3 border border-cyan-200 print:hidden z-[100] transition-all ${
-        isAtBottom ? 'bg-white' : 'bg-white/80 backdrop-blur-sm'
-      }`}>
+      <div className={`fixed bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-2 md:gap-4 rounded-full shadow-xl px-4 md:px-6 py-2 md:py-3 border border-cyan-200 print:hidden z-[100] transition-all ${isAtBottom ? 'bg-white' : 'bg-white/80 backdrop-blur-sm'
+        }`}>
         <button
           onClick={prevPage}
           disabled={currentPage === 0}
@@ -1597,17 +774,16 @@ export default function App() {
         >
           <ChevronLeft className="w-5 h-5 md:w-5 md:h-5 text-cyan-600" />
         </button>
-        
+
         <div className="flex items-center gap-1.5 md:gap-2">
           {pageConfigs.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentPage(index)}
-              className={`h-1.5 md:h-2 rounded-full transition-all touch-manipulation ${
-                currentPage === index
-                  ? 'w-6 md:w-8 bg-cyan-500'
-                  : 'w-1.5 md:w-2 bg-gray-300 hover:bg-cyan-300'
-              }`}
+              className={`h-1.5 md:h-2 rounded-full transition-all touch-manipulation ${currentPage === index
+                ? 'w-6 md:w-8 bg-cyan-500'
+                : 'w-1.5 md:w-2 bg-gray-300 hover:bg-cyan-300'
+                }`}
             />
           ))}
         </div>
@@ -1622,9 +798,8 @@ export default function App() {
       </div>
 
       {/* Page Counter */}
-      <div className={`fixed bottom-4 md:bottom-8 right-4 md:right-8 rounded-full shadow-lg px-3 md:px-4 py-1.5 md:py-2 border border-cyan-200 print:hidden z-[100] transition-all ${
-        isAtBottom ? 'bg-white' : 'bg-white/80 backdrop-blur-sm'
-      }`}>
+      <div className={`fixed bottom-4 md:bottom-8 right-4 md:right-8 rounded-full shadow-lg px-3 md:px-4 py-1.5 md:py-2 border border-cyan-200 print:hidden z-[100] transition-all ${isAtBottom ? 'bg-white' : 'bg-white/80 backdrop-blur-sm'
+        }`}>
         <span className="text-sm md:text-base text-cyan-600">
           {currentPage + 1} / {pageConfigs.length}
         </span>

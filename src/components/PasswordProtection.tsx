@@ -11,8 +11,8 @@ export function PasswordProtection({ onAuthenticate }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password === '01089885545') {
+
+    if (password === import.meta.env.VITE_APP_PASSWORD) {
       sessionStorage.setItem('tour-authenticated', 'true');
       onAuthenticate();
     } else {

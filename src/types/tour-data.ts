@@ -1,3 +1,4 @@
+import { TextStyle } from './text-style';
 export interface TourData {
   title: string;
   subtitle: string;
@@ -12,7 +13,7 @@ export interface TourData {
   coverPlanningLabel: string;
   coverCopyright: string; // Copyright notice on cover page
   plannerName: string;
-  
+
   // Cover page text styles
   coverMainTitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   coverTitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
@@ -20,19 +21,19 @@ export interface TourData {
   coverDateStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   plannerNameStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   coverCopyrightStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
-  
+
   travelParty: string;
   travelTheme: string;
   specialRequests: string;
   highlights: string;
-  
+
   // Introduction page editable labels
   travelPartyLabel: string;
   travelThemeLabel: string;
   travelPeriodLabel: string;
   importantRequestsLabel: string;
   highlightsTitle: string;
-  
+
   // Introduction page text
   introductionTitle: string;
   introductionSubtitle: string;
@@ -91,8 +92,9 @@ export interface TourData {
   flightArrivalServicesTitle: string;
   flightArrivalTransitLabel: string;
   flightArrivalChecklistTitle: string;
-  
+
   // Itinerary Calendar page editable labels
+  itineraryCalendarDateRange: string;
   itineraryCalendarTitle: string;
   itineraryTransportTitle: string;
   itineraryCountryTitle: string;
@@ -193,7 +195,7 @@ export interface TourData {
   transportationLabel: string;
   accommodationSummary: string;
   accommodationLabel: string;
-  
+
   // Quotation data
   totalCost: string;
   costWarning: string;
@@ -213,7 +215,7 @@ export interface TourData {
   excludedItemsTitle: string;
   excludedItems: string;
   excludedItemsNote: string;
-  
+
   flights: {
     departure: {
       isDirect: boolean;
@@ -258,19 +260,19 @@ export interface TourData {
       checklist: string;
     };
   };
-  
+
   itinerary: {
-    date: number;
+    date: string | number;
     country: string;
     city: string;
     transport: 'plane' | 'train' | 'car' | 'bus' | null;
     dayNum: number;
   }[];
-  
+
   countryColors: {
     [country: string]: string; // country name -> tailwind color class
   };
-  
+
   accommodations: {
     country: string;
     city: string;
@@ -321,14 +323,14 @@ export interface TourData {
   accommodationAttractionItemStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   accommodationCityTaxLabelStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   accommodationCityTaxStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
-  
+
   services: {
     title: string;
     description: string;
     includes: string;
     color: 'cyan' | 'yellow';
   }[];
-  
+
   // Process page data
   processTitle: string;
   processLabels: string[];
@@ -336,12 +338,12 @@ export interface TourData {
   processSubtext2: string;
   processSubtext3: string;
   processNote: string;
-  
+
   // Process page text
   processPageTitle: string;
   serviceOptionsTitle: string;
   serviceIncludesTitle: string;
-  
+
   // Process page text styles
   processPageTitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   processTitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
@@ -353,7 +355,7 @@ export interface TourData {
   serviceDescriptionStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   serviceIncludesTitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
   serviceIncludesItemStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
-  
+
   // Payment page text styles
   paymentPageTitle: string;
   paymentPageTitleStyle?: { size: string; weight: 'normal' | 'semibold' | 'bold'; color: string; };
@@ -392,7 +394,7 @@ export interface TourData {
   paymentCardReceiptTitle: string;
   paymentCancellation: string;
   paymentCancellationTitle: string;
-  
+
   // Detailed schedule data
   detailedSchedules: {
     day: number;
@@ -409,7 +411,7 @@ export interface TourData {
       imageUrl?: string;
     }[];
   }[];
-  
+
   // Tourist spots list data
   touristSpotPickTitle: string;
   touristSpots?: {
@@ -427,14 +429,14 @@ export interface TourData {
       imageUrl?: string;
     }[];
   }[];
-  
+
   // Transportation pages data
   transportationPages?: {
     country: string;
     city: string;
     options: TransportationOption[];
   }[];
-  
+
   // Transportation tickets data
   transportationTicketTitle: string;
   transportationTickets?: {
@@ -464,16 +466,16 @@ export interface TourData {
       contentStyle?: TextStyle;
     }[];
   }[];
-  
+
   transportationRestrictions?: {
     id: string;
     content: string;
     contentStyle?: TextStyle;
   }[];
-  
+
   transportationRestrictionsTitle?: string;
   transportationRestrictionsTitleStyle?: TextStyle;
-  
+
   // Transportation cards data
   transportationCardPageTitle: string;
   transportationCards?: {
@@ -502,13 +504,13 @@ export interface TourData {
       contentStyle?: TextStyle;
     }[];
   }[];
-  
+
   transportationCardRestrictions?: {
     id: string;
     content: string;
     contentStyle?: TextStyle;
   }[];
-  
+
   transportationCardRestrictionsTitle?: string;
   transportationCardRestrictionsTitleStyle?: TextStyle;
 }
@@ -540,7 +542,7 @@ export const defaultTourData: TourData = {
   coverPlanningLabel: '1차 플래닝',
   coverCopyright: '* 본 문서는 유니나투어의 자산으로 외부 공유 및 배포를 금하며,\\n유포시 법적 책임 소지가 있습니다.',
   plannerName: '황이나',
-  
+
   // Cover page text styles
   coverMainTitleStyle: { size: '48px', weight: 'bold', color: '#0891b2' },
   coverTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
@@ -548,23 +550,23 @@ export const defaultTourData: TourData = {
   coverDateStyle: { size: '20px', weight: 'normal', color: '#6b7280' },
   plannerNameStyle: { size: '14px', weight: 'normal', color: '#6b7280' },
   coverCopyrightStyle: { size: '12px', weight: 'normal', color: '#6b7280' },
-  
+
   travelParty: 'O명 (OOO님, OOO님)',
   travelTheme: '신혼여행 / 처음 유럽여행',
   specialRequests: '결혼식 후 바로 떠나는 신혼여행 입니다. 여기는 꼭 보고싶어요! 호텔은 4성급이상이 좋습니다. / 항공은 비즈니스를 원합니다.',
   highlights: '후기가 좋은 4-5성급 호텔\n대한항공 직항 비즈니스 항공\n공항 - 숙소간의 전용차량 배치\n분위기있는 레스토랑 예약\n신혼여행의 분위기 업 스냅예약',
-  
+
   // Introduction page editable labels
   travelPartyLabel: '여행 참가자',
   travelThemeLabel: '여행 테마',
   travelPeriodLabel: '여행 기간',
   importantRequestsLabel: '중요 요청사항',
   highlightsTitle: '여행 하이라이트',
-  
+
   // Introduction page text
   introductionTitle: '여행 소개',
   introductionSubtitle: '고객 니즈 체크',
-  
+
   // Introduction page text styles
   introductionTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
   introductionSubtitleStyle: { size: '20px', weight: 'normal', color: '#374151' },
@@ -578,7 +580,7 @@ export const defaultTourData: TourData = {
   specialRequestsStyle: { size: '18px', weight: 'normal', color: '#1f2937' },
   highlightsTitleStyle: { size: '20px', weight: 'normal', color: '#6b7280' },
   highlightsStyle: { size: '18px', weight: 'normal', color: '#1f2937' },
-  
+
   // Flight pages editable labels
   flightDepartureDescription: '한국에서 유럽으로 출발하는 항공편 정보입니다',
   flightTransitDescription: '유럽 내 이동하는 항공편 정보입니다',
@@ -619,12 +621,12 @@ export const defaultTourData: TourData = {
   flightArrivalServicesTitle: '포함 서비스',
   flightArrivalTransitLabel: '환승 대기 시간:',
   flightArrivalChecklistTitle: '✓ 귀국 전 확인사항',
-  
+
   // Itinerary Calendar page editable labels
   itineraryCalendarTitle: '여행 일정',
   itineraryTransportTitle: '이동수단',
   itineraryCountryTitle: '방문 국가',
-  
+
   // Flight pages text styles
   flightDepartureDescriptionStyle: { size: '20px', weight: 'normal', color: '#6b7280' },
   flightDepartureTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
@@ -655,7 +657,7 @@ export const defaultTourData: TourData = {
   flightArrivalServicesTitleStyle: { size: '18px', weight: 'normal', color: '#111827' },
   flightArrivalServicesItemStyle: { size: '18px', weight: 'normal', color: '#111827' },
   flightArrivalChecklistItemStyle: { size: '18px', weight: 'normal', color: '#111827' },
-  
+
   // Itinerary Calendar page text styles
   itineraryCalendarTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
   itineraryCalendarDateRangeStyle: { size: '20px', weight: 'normal', color: '#374151' },
@@ -670,7 +672,7 @@ export const defaultTourData: TourData = {
   itineraryCalendarDayLabelStyle: { size: '9px', weight: 'normal', color: '#ffffff' },
   itineraryCalendarCountryNameStyle: { size: '9px', weight: 'normal', color: '#4b5563' },
   itineraryCalendarCityNameStyle: { size: '10px', weight: 'normal', color: '#1f2937' },
-  
+
   // Detailed Schedule page text styles
   detailedScheduleDayTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
   detailedScheduleDateStyle: { size: '20px', weight: 'normal', color: '#1f2937' },
@@ -687,7 +689,7 @@ export const defaultTourData: TourData = {
   detailedScheduleCardTimeTextStyle: { size: '18px', weight: 'normal', color: '#111827' },
   detailedScheduleCardActivityStyle: { size: '18px', weight: 'normal', color: '#111827' },
   detailedScheduleCardNotesStyle: { size: '18px', weight: 'normal', color: '#111827' },
-  
+
   // Transportation pages text styles
   transportationTicketTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
   transportationCardTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
@@ -721,7 +723,7 @@ export const defaultTourData: TourData = {
   transportationLabel: '교통 수단',
   accommodationSummary: '후기가 좋은 4-5성급 호텔',
   accommodationLabel: '숙소 요약',
-  
+
   // Quotation data
   totalCost: '₩5,000,000',
   costWarning: '가격은 예상 가격이며, 실제 가격은 항공사 및 호텔의 정책에 따라 변동될 수 있습니다.',
@@ -741,7 +743,7 @@ export const defaultTourData: TourData = {
   excludedItemsTitle: '견적 불포함사항',
   excludedItems: '항공사 추가 수수료, 호텔 도시세 및 추가 수수료, 렌트비용, 개인비용 ',
   excludedItemsNote: '* 불포함 사항 예약 대행시 추가 금액이 발생합니다',
-  
+
   flights: {
     departure: {
       isDirect: true,
@@ -789,19 +791,21 @@ export const defaultTourData: TourData = {
       checklist: '출발 3시간 전까지 공항 도착을 권장합니다\n면세품 구매 한도를 확인해주세요 (US $600)\n도착 후 입국심사 및 세관신고를 진행합니다'
     }
   },
-  
+
   itinerary: [
-    { date: 5, country: '한국', city: '인천', transport: 'plane', dayNum: 1 },
-    { date: 6, country: '프랑스', city: '니스', transport: null, dayNum: 2 },
-    { date: 7, country: '프랑스', city: '니스', transport: null, dayNum: 3 },
+    { date: '2026-08-05', country: '한국', city: '인천', transport: 'plane', dayNum: 1 },
+    { date: '2026-08-06', country: '프랑스', city: '니스', transport: null, dayNum: 2 },
+    { date: '2026-08-07', country: '프랑스', city: '니스', transport: null, dayNum: 3 },
   ],
-  
+
+  itineraryCalendarDateRange: '',
+
   countryColors: {
     '프랑스': 'bg-blue-500',
     '이탈리아': 'bg-red-500',
     '스위스': 'bg-gray-500'
   },
-  
+
   accommodations: [
     {
       country: '프랑스',
@@ -883,7 +887,7 @@ export const defaultTourData: TourData = {
   accommodationAttractionItemStyle: { size: '16px', weight: 'normal', color: '#374151' },
   accommodationCityTaxLabelStyle: { size: '18px', weight: 'normal', color: '#6b7280' },
   accommodationCityTaxStyle: { size: '18px', weight: 'normal', color: '#1f2937' },
-  
+
   services: [
     {
       title: '코어플랜 (CORE PLAN) - 예약대행과 케어서비스가 빠진 부분 플랜입니다.',
@@ -898,7 +902,7 @@ export const defaultTourData: TourData = {
       color: 'yellow' as const
     }
   ],
-  
+
   // Process page data
   processTitle: '유니나는 유럽 여행 디자인 프로세스',
   processLabels: [
@@ -914,15 +918,15 @@ export const defaultTourData: TourData = {
   processSubtext2: '견적금액 완불 후 일정 진행됩니다.',
   processSubtext3: '직접 방문해 자세한 플랜을 안내드립니다. 10만 원 상당의 유니나 자체 제작 상품 포함 굿즈 전달드립니다.',
   processNote: '* 여행 1개월 전 완료 예정',
-  
+
   // Process page text
   processPageTitle: '여행 진행 프로세스',
   serviceOptionsTitle: '서비스 옵션',
   serviceIncludesTitle: '포함 내역',
-  
+
   // Tourist spot list page text
   touristSpotPickTitle: "TODAY'S PICK",
-  
+
   // Process page text styles
   processPageTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
   processTitleStyle: { size: '20px', weight: 'bold', color: '#0891b2' },
@@ -934,7 +938,7 @@ export const defaultTourData: TourData = {
   serviceDescriptionStyle: { size: '16px', weight: 'normal', color: '#4b5563' },
   serviceIncludesTitleStyle: { size: '18px', weight: 'normal', color: '#6b7280' },
   serviceIncludesItemStyle: { size: '16px', weight: 'normal', color: '#374151' },
-  
+
   // Payment page data
   paymentMethodsAddButtonText: '결제 방법 추가',
   paymentMethods: [
@@ -947,6 +951,7 @@ export const defaultTourData: TourData = {
       details: '100-038-034779 신한은행 (예금주: 주식회사 유니나투어)\n현금영수증 발행 시 여행사 수수료에 한해 발행이 가능하며, 입금 후 현금영수증 번호 전달해주시면 신속한 처리 도와드리겠습니다.  '
     }
   ],
+  paymentNoticesTitle: '주의사항',
   paymentNotices: '카드 결제 시 해외 공급사 결제처리로 인하여 카드사 해외 결제 수수료(2%)가 부과됩니다.\n\n유니나투어에서는 여행상품 특성상 항공·호텔 등 외부 공급사 비용을 제외한 \'여행사 수수료(대행료)\' 금액에 한해 현금영수증 발행이 가능합니다. 이는 관련 세법 기준에 따른 것으로, 여행 일정 및 공급 구조에 따라 발행 금액이 달라질 수 있습니다. 현금영수증 발행을 원하시는 경우, 예약 시점에 미리 요청해 주시면 신속히 처리 도와드리겠습니다.\n\n환불 및 변경은 출발 30일 이전까지 가능합니다. 변경·취소·환불 요청 시에는 **유니나투어 수수료(1인 200,000원)**가 적용되며, 여기에 더해 각 공급사(항공/호텔/현지사)의 규정에 따라 추가 수수료가 발생할 수 있습니다. ',
   contactEmail: 'uninatour@naver.com',
   contactPhone: '010-8988-5545',
@@ -955,8 +960,10 @@ export const defaultTourData: TourData = {
   paymentDeadlineTitle: '총 비용',
   paymentDeadline: '유니나투어 여행상품은 항공·호텔·현지 서비스 등 해외 공급사와의 즉시 확정 결제(예약 대행비 선지급)가 필요한 구조입니다.\n\n따라서 견적 확정 후에는 전체 금액 100% 결제 확인 후 예약 진행이 가능합니다.\n결제 순으로 확정되며, 미결제 시 예약이 보장되지 않는 점 양해 부탁드립니다.',
   paymentCardReceipt: '여행상품 특성상 항공·호텔 등 외부 공급사 비용을 제외한 \'여행사 수수료(대행료)\' 금액에 한해 현금영수증 발행이 가능합니다. 이는 관련 세법 기준에 따른 것으로, 여행 일정 및 공급 구조에 따라 발행 금액이 달라질 수 있습니다. 현금영수증 발행을 원하시는 경우, 예약 시점에 미리 요청해 주시면 신속히 처리 도와드리겠습니다.\n\n카드 결제 영수증은 이메일 또는 카카오톡으로 전송됩니다.',
+  paymentCardReceiptTitle: '영수증 발행 안내',
   paymentCancellation: '여행 취소 시 환불은 출발 30일 이전까지 가능하며, 유니나투어 수수료 (1인 200,000원)가 적용되며, 각 공급사 (항공/호텔/현지사)의 규정에 따라 추가 수수료가 발생되니 신중한 결정 부탁드립니다.',
-  
+  paymentCancellationTitle: '취소 및 환불 규정',
+
   // Detailed schedule data
   detailedSchedules: [
     {
@@ -1004,7 +1011,7 @@ export const defaultTourData: TourData = {
       ]
     }
   ],
-  
+
   // Transportation pages data
   transportationPages: [
     {
@@ -1083,7 +1090,7 @@ export const defaultTourData: TourData = {
       ]
     }
   ],
-  
+
   // Transportation tickets data
   transportationTickets: [
     {
@@ -1153,7 +1160,7 @@ export const defaultTourData: TourData = {
       ]
     }
   ],
-  
+
   transportationRestrictions: [
     {
       id: '1',
@@ -1166,11 +1173,11 @@ export const defaultTourData: TourData = {
       contentStyle: { size: '18px', weight: 'normal', color: '#111827' }
     }
   ],
-  
+
   transportationTicketTitle: '교통편 안내',
   transportationRestrictionsTitle: '주의사항',
   transportationRestrictionsTitleStyle: { size: '16px', weight: 'bold', color: '#b91c1c' },
-  
+
   // Transportation cards data
   transportationCardPageTitle: '교통카드 안내',
   transportationCards: [
@@ -1239,7 +1246,7 @@ export const defaultTourData: TourData = {
       ]
     }
   ],
-  
+
   transportationCardRestrictions: [
     {
       id: '1',
@@ -1252,10 +1259,10 @@ export const defaultTourData: TourData = {
       contentStyle: { size: '18px', weight: 'normal', color: '#111827' }
     }
   ],
-  
+
   transportationCardRestrictionsTitle: '주의사항',
   transportationCardRestrictionsTitleStyle: { size: '16px', weight: 'bold', color: '#b91c1c' },
-  
+
   // Payment page text styles
   paymentPageTitle: '결제 안내',
   paymentPageTitleStyle: { size: '35px', weight: 'semibold', color: '#0891b2' },
@@ -1267,7 +1274,7 @@ export const defaultTourData: TourData = {
   paymentMethodItemDetailStyle: { size: '18px', weight: 'normal', color: '#111827' },
   paymentNoticesTitleStyle: { size: '20px', weight: 'normal', color: '#111827' },
   paymentNoticesItemStyle: { size: '18px', weight: 'normal', color: '#111827' },
-  
+
   // Contact page text styles
   contactTitleStyle: { size: '20px', weight: 'normal', color: '#fafcff' },
   contactInfoStyle: { size: '20px', weight: 'normal', color: '#f4f6fa' },

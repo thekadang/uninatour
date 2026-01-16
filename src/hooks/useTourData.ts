@@ -9,9 +9,30 @@ import { storage, STORAGE_KEYS } from '../utils/storage';
  */
 export function useTourData() {
   const [tourData, setTourData] = useState<TourData>(() => {
-    // 저장된 데이터와 기본값 병합: 누락된 필드는 기본값 사용
-    const savedData = storage.get(STORAGE_KEYS.TOUR_DATA, null);
-    return savedData ? { ...defaultTourData, ...savedData } : defaultTourData;
+    const migrateTourData = (data: TourData): TourData => {
+      if (!data.itinerary) return data;
+
+      const startParts = data.startDate.split('-');
+      if (startParts.length < 3) return data;
+
+      const startYear = startParts[0];
+      const startMonth = startParts[1];
+
+      const migratedItinerary = data.itinerary.map(item => {
+        if (typeof item.date === 'number') {
+          return {
+            ...item,
+            date: `${startYear}-${startMonth.padStart(2, '0')}-${String(item.date).padStart(2, '0')}`
+          };
+        }
+        return item;
+      });
+
+      return { ...data, itinerary: migratedItinerary };
+    };
+
+    const savedData = storage.get(STORAGE_KEYS.TOUR_DATA, defaultTourData);
+    return migrateTourData({ ...defaultTourData, ...savedData });
   });
 
   // tourData 변경 시 localStorage에 자동 저장

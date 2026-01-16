@@ -74,6 +74,11 @@ export function useBlurData() {
     });
   }, []);
 
+  // 모든 페이지의 블러 모드 해제
+  const clearBlurModePages = useCallback(() => {
+    setBlurModePages(new Set());
+  }, []);
+
   // 모든 블러 데이터 초기화
   const resetBlurData = useCallback(() => {
     setBlurData({});
@@ -89,6 +94,7 @@ export function useBlurData() {
     removeBlurRegion,
     getBlurRegions,
     clearPageBlurRegions,
+    clearBlurModePages,
     resetBlurData
   };
 }

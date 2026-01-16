@@ -35,15 +35,33 @@ const defaultPageConfigs: PageConfig[] = [
  */
 export function usePageConfigs() {
   const [pageConfigs, setPageConfigs] = useState<PageConfig[]>(() => {
+    // 마이그레이션 함수: 새로운 페이지 타입이 누락된 경우 자동 추가
+    const migratePageConfigs = (configs: PageConfig[]): PageConfig[] => {
+      let migrated = [...configs];
+
+      // contact 페이지가 없으면 마지막에 추가
+      if (!migrated.some(p => p.type === 'contact')) {
+        migrated.push({ id: '14', type: 'contact', title: '문의 하기' });
+      }
+
+      // service-options 페이지가 없으면 process 다음에 추가
+      const hasServiceOptions = migrated.some(c => c.type === 'service-options');
+      if (!hasServiceOptions) {
+        const processIndex = migrated.findIndex(c => c.type === 'process');
+        if (processIndex !== -1) {
+          migrated.splice(processIndex + 1, 0, {
+            id: '10-1',
+            type: 'service-options',
+            title: '서비스 옵션'
+          });
+        }
+      }
+
+      return migrated;
+    };
+
     const saved = storage.get(STORAGE_KEYS.PAGE_CONFIGS, defaultPageConfigs);
-
-    // 마이그레이션: contact 페이지가 없으면 추가
-    if (!saved.some((p: PageConfig) => p.type === 'contact')) {
-      const contactPage: PageConfig = { id: '14', type: 'contact', title: '문의 하기' };
-      return [...saved, contactPage];
-    }
-
-    return saved;
+    return migratePageConfigs(saved);
   });
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -60,8 +78,8 @@ export function usePageConfigs() {
     }
   }, [pageConfigs.length, currentPage]);
 
-  // 새 ID 생성
-  const generateId = useCallback(() => Date.now().toString(), []);
+  // 새 ID 생성 (충돌 방지를 위해 무작위 문자열 추가)
+  const generateId = useCallback(() => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, []);
 
   // 페이지 추가
   const addPage = useCallback((page: Omit<PageConfig, 'id'>, afterIndex?: number) => {
@@ -97,9 +115,11 @@ export function usePageConfigs() {
 
     const pageToDuplicate = pageConfigs[index];
     const newPage: PageConfig = {
-      ...JSON.parse(JSON.stringify(pageToDuplicate)),
+      ...pageToDuplicate,
       id: generateId(),
-      title: pageToDuplicate.title + ' (복사)'
+      title: pageToDuplicate.title + ' (복사)',
+      // 데이터가 있는 경우에만 깊은 복사 수행
+      data: pageToDuplicate.data ? JSON.parse(JSON.stringify(pageToDuplicate.data)) : undefined
     };
 
     setPageConfigs(prev => {
