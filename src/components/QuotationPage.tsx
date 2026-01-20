@@ -1,6 +1,6 @@
 import { DollarSign, FileText, AlertCircle, CheckCircle2, XCircle, Copy, Trash2, Package, Calendar, Globe, Users, Plane, Hotel, Eye, EyeOff } from 'lucide-react';
 import { TourData } from '../types/tour-data';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Button } from './ui/button';
 import { StylePicker } from './StylePicker';
 import { getStyleObject } from '../types/text-style';
@@ -22,12 +22,12 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function QuotationPage({ 
-  data, 
-  isEditMode, 
-  onUpdate, 
-  onDuplicate, 
-  onDelete, 
+export const QuotationPage = memo(function QuotationPage({
+  data,
+  isEditMode,
+  onUpdate,
+  onDuplicate,
+  onDelete,
   canDelete,
   pageId = '',
   isBlurMode = false,
@@ -39,7 +39,7 @@ export function QuotationPage({
   const [isHovered, setIsHovered] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
-  
+
   const startEdit = (field: string, currentValue: string) => {
     if (!isEditMode) return;
     setEditingField(field);
@@ -52,11 +52,11 @@ export function QuotationPage({
         onUpdate({ quotationPageTitle: tempValue });
       } else if (editingField.startsWith('label')) {
         const labelNum = editingField.replace('label', '');
-        onUpdate({ 
-          quotationLabels: { 
-            ...data.quotationLabels, 
-            [`label${labelNum}`]: tempValue 
-          } 
+        onUpdate({
+          quotationLabels: {
+            ...data.quotationLabels,
+            [`label${labelNum}`]: tempValue
+          }
         });
       } else {
         onUpdate({ [editingField]: tempValue });
@@ -79,19 +79,19 @@ export function QuotationPage({
       cancelEdit();
     }
   };
-  
+
   const summary = [
-    { 
-      icon: Package, 
+    {
+      icon: Package,
       label: data.productNameLabel,
-      value: data.productName, 
+      value: data.productName,
       editable: true,
       field: 'productName',
       labelEditable: true,
       labelField: 'productNameLabel'
     },
-    { 
-      icon: Calendar, 
+    {
+      icon: Calendar,
       label: data.periodLabel,
       value: (() => {
         const start = data.startDate.replace(/-/g, '.');
@@ -103,37 +103,37 @@ export function QuotationPage({
       labelEditable: true,
       labelField: 'periodLabel'
     },
-    { 
-      icon: Globe, 
+    {
+      icon: Globe,
       label: data.countriesLabel,
-      value: data.countries, 
-      editable: true, 
+      value: data.countries,
+      editable: true,
       field: 'countries',
       labelEditable: true,
       labelField: 'countriesLabel'
     },
-    { 
-      icon: Users, 
+    {
+      icon: Users,
       label: data.participantsLabel,
-      value: data.travelParty, 
+      value: data.travelParty,
       editable: false,
       labelEditable: true,
       labelField: 'participantsLabel'
     },
-    { 
-      icon: Plane, 
+    {
+      icon: Plane,
       label: data.transportationLabel,
-      value: data.transportation, 
-      editable: true, 
+      value: data.transportation,
+      editable: true,
       field: 'transportation',
       labelEditable: true,
       labelField: 'transportationLabel'
     },
-    { 
-      icon: Hotel, 
+    {
+      icon: Hotel,
       label: data.accommodationLabel,
-      value: data.accommodationSummary, 
-      editable: true, 
+      value: data.accommodationSummary,
+      editable: true,
       field: 'accommodationSummary',
       labelEditable: true,
       labelField: 'accommodationLabel'
@@ -145,7 +145,7 @@ export function QuotationPage({
   const excluded = data.excludedItems.split('\n').filter(item => item.trim());
 
   return (
-    <div 
+    <div
       className="min-h-screen p-4 md:p-6 lg:p-8 py-12 md:py-16 print:py-10 print:px-12 relative blur-container"
       data-has-blur={blurRegions.length > 0 ? "true" : undefined}
       onMouseEnter={() => setIsHovered(true)}
@@ -157,11 +157,10 @@ export function QuotationPage({
           {onToggleBlurMode && (
             <button
               onClick={onToggleBlurMode}
-              className={`p-2 rounded transition-colors ${
-                isBlurMode
+              className={`p-2 rounded transition-colors ${isBlurMode
                   ? 'bg-purple-100 hover:bg-purple-200'
                   : 'hover:bg-purple-50'
-              }`}
+                }`}
               title={isBlurMode ? '블러 모드 비활성화' : '블러 모드 활성화'}
             >
               {isBlurMode ? (
@@ -191,7 +190,7 @@ export function QuotationPage({
           )}
         </div>
       )}
-      
+
       <div className="max-w-3xl mx-auto space-y-6 print:space-y-4">
         {/* Header */}
         <div className="text-center">
@@ -264,7 +263,7 @@ export function QuotationPage({
                     />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <p 
+                      <p
                         className="text-gray-500 text-base cursor-pointer hover:bg-blue-50 px-2 py-1 rounded transition-colors inline-block font-bold text-[18px]"
                         style={getStyleObject(data.quotationSummaryLabelStyle)}
                         onClick={() => startEdit(item.labelField!, item.label)}
@@ -313,7 +312,7 @@ export function QuotationPage({
                     />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <p 
+                      <p
                         className="text-gray-800 text-lg cursor-pointer hover:bg-yellow-50 px-2 py-1 rounded transition-colors text-[15px]"
                         style={getStyleObject(data.quotationSummaryValueStyle)}
                         onClick={() => startEdit(item.field!, item.value)}
@@ -367,7 +366,7 @@ export function QuotationPage({
                   className="text-base print:text-sm opacity-90 bg-cyan-700 text-white px-2 py-1 rounded border border-cyan-400 focus:outline-none focus:border-white text-center"
                 />
               ) : (
-                <p 
+                <p
                   className="text-base print:text-sm opacity-90 cursor-pointer hover:bg-cyan-700 px-2 py-1 rounded transition-colors"
                   style={getStyleObject(data.quotationEstimatedTitleStyle)}
                   onClick={() => startEdit('estimatedCostTitle', data.estimatedCostTitle)}
@@ -387,7 +386,7 @@ export function QuotationPage({
               />
             )}
           </div>
-          
+
           <div className="flex items-center justify-center gap-2">
             {isEditMode ? (
               editingField === 'estimatedCostAmount' ? (
@@ -401,7 +400,7 @@ export function QuotationPage({
                   className="text-3xl print:text-2xl bg-cyan-700 text-white px-2 py-1 rounded border border-cyan-400 focus:outline-none focus:border-white w-full text-center"
                 />
               ) : (
-                <p 
+                <p
                   className="text-3xl print:text-2xl cursor-pointer hover:bg-cyan-700 px-2 py-1 rounded transition-colors"
                   style={getStyleObject(data.quotationEstimatedAmountStyle)}
                   onClick={() => startEdit('estimatedCostAmount', data.estimatedCostAmount)}
@@ -421,7 +420,7 @@ export function QuotationPage({
               />
             )}
           </div>
-          
+
           <div className="flex items-center justify-center gap-2 mt-2">
             {isEditMode ? (
               editingField === 'estimatedCostNote' ? (
@@ -435,7 +434,7 @@ export function QuotationPage({
                   className="text-xs print:text-[10px] opacity-80 bg-cyan-700 text-white px-2 py-1 rounded border border-cyan-400 focus:outline-none focus:border-white w-full"
                 />
               ) : (
-                <p 
+                <p
                   className="text-xs print:text-[10px] opacity-80 cursor-pointer hover:bg-cyan-700 px-2 py-1 rounded transition-colors"
                   style={getStyleObject(data.quotationEstimatedNoteStyle)}
                   onClick={() => startEdit('estimatedCostNote', data.estimatedCostNote)}
@@ -473,7 +472,7 @@ export function QuotationPage({
                   className="text-green-700 text-base print:text-sm bg-green-50 px-2 py-1 rounded border border-green-300 focus:outline-none focus:border-green-500 flex-1"
                 />
               ) : (
-                <h3 
+                <h3
                   className="text-green-700 text-base print:text-sm cursor-pointer hover:bg-green-50 px-2 py-1 rounded transition-colors font-bold"
                   style={getStyleObject(data.quotationIncludedTitleStyle)}
                   onClick={() => startEdit('includedItemsTitle', data.includedItemsTitle)}
@@ -505,7 +504,7 @@ export function QuotationPage({
                 className="w-full text-gray-700 text-sm print:text-xs bg-green-50 px-3 py-2 rounded border border-green-300 focus:outline-none focus:border-green-500 resize-none"
               />
             ) : (
-              <div 
+              <div
                 className="space-y-2 print:space-y-1.5 cursor-pointer hover:bg-green-50 p-2 rounded transition-colors"
                 onClick={() => startEdit('includedItems', data.includedItems)}
               >
@@ -567,7 +566,7 @@ export function QuotationPage({
                   className="text-red-700 text-base print:text-sm bg-red-50 px-2 py-1 rounded border border-red-300 focus:outline-none focus:border-red-500 flex-1"
                 />
               ) : (
-                <h3 
+                <h3
                   className="text-red-700 text-base print:text-sm cursor-pointer hover:bg-red-50 px-2 py-1 rounded transition-colors font-bold"
                   style={getStyleObject(data.quotationExcludedTitleStyle)}
                   onClick={() => startEdit('excludedItemsTitle', data.excludedItemsTitle)}
@@ -597,11 +596,11 @@ export function QuotationPage({
                   autoFocus
                   rows={6}
                   placeholder="각 항목을 엔터로 구분하여 입력하세요"
-                  className="w-full text-gray-700 text-sm print:text-xs bg-red-50 px-3 py-2 rounded border border-red-300 focus:outline-none focus:border-red-500 resize-none"
+                  className="w-full text-gray-700 text-sm print:text-xs bg-red-50 px-3 py-2 rounded border border-green-300 focus:outline-none focus:border-green-500 resize-none"
                 />
               </div>
             ) : (
-              <div 
+              <div
                 className="space-y-2 print:space-y-1.5 mb-4 print:mb-3 cursor-pointer hover:bg-red-50 p-2 rounded transition-colors"
                 onClick={() => startEdit('excludedItems', data.excludedItems)}
               >
@@ -659,7 +658,7 @@ export function QuotationPage({
                     className="text-gray-600 text-xs print:text-[10px] bg-gray-50 px-2 py-1 rounded border border-gray-300 focus:outline-none focus:border-gray-500 w-full"
                   />
                 ) : (
-                  <p 
+                  <p
                     className="text-gray-600 text-xs print:text-[10px] cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                     style={getStyleObject(data.quotationExcludedNoteStyle)}
                     onClick={() => startEdit('excludedItemsNote', data.excludedItemsNote)}
@@ -697,4 +696,4 @@ export function QuotationPage({
       )}
     </div>
   );
-}
+});

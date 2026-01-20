@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { MapPin, Calendar, Star, CheckCircle2, MapPinned, XCircle, Edit3, Trash2, Copy, Image as ImageIcon, X, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ImageWithControls } from './ImageWithControls';
@@ -49,11 +49,11 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function EditableAccommodationPage({ 
-  hotel, 
-  isEditMode, 
-  onUpdate, 
-  onDuplicate, 
+export const EditableAccommodationPage = memo(function EditableAccommodationPage({
+  hotel,
+  isEditMode,
+  onUpdate,
+  onDuplicate,
   onDelete,
   canDelete,
   data,
@@ -80,18 +80,18 @@ export function EditableAccommodationPage({
     accommodationCityTaxLabel: data?.accommodationCityTaxLabel || '예상 도시세',
   });
   const [isHovered, setIsHovered] = useState(false);
-  
+
   // 문구 편집 상태
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState('');
-  
+
   // 이미지 편집 상태
   const [editingImageIndex, setEditingImageIndex] = useState<number | null>(null);
   const [imageUrl, setImageUrl] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
   const [currentObjectFit, setCurrentObjectFit] = useState<'cover' | 'contain' | 'fill' | 'none'>('cover');
   const [currentObjectPosition, setCurrentObjectPosition] = useState('center');
-  
+
   // 이미지 뷰어 상태
   const [viewingImageIndex, setViewingImageIndex] = useState<number | null>(null);
 
@@ -198,17 +198,17 @@ export function EditableAccommodationPage({
     if (editingImageIndex !== null && (imageUrl || previewUrl)) {
       const newImages = [...editData.images];
       newImages[editingImageIndex] = imageUrl || previewUrl;
-      
+
       // Initialize arrays if they don't exist
       const newObjectFit = editData.imageObjectFit || Array(editData.images.length).fill('cover');
       const newObjectPosition = editData.imageObjectPosition || Array(editData.images.length).fill('center');
-      
+
       // Update the specific index
       newObjectFit[editingImageIndex] = currentObjectFit;
       newObjectPosition[editingImageIndex] = currentObjectPosition;
-      
-      const updatedData = { 
-        ...editData, 
+
+      const updatedData = {
+        ...editData,
         images: newImages,
         imageObjectFit: newObjectFit,
         imageObjectPosition: newObjectPosition
@@ -228,7 +228,7 @@ export function EditableAccommodationPage({
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen p-4 md:p-6 lg:p-8 py-12 md:py-16 print:py-10 print:px-12 relative blur-container"
       data-has-blur={blurRegions.length > 0 ? "true" : undefined}
       onMouseEnter={() => setIsHovered(true)}
@@ -240,11 +240,10 @@ export function EditableAccommodationPage({
           {onToggleBlurMode && (
             <button
               onClick={onToggleBlurMode}
-              className={`p-2 rounded transition-colors ${
-                isBlurMode
-                  ? 'bg-purple-100 hover:bg-purple-200'
-                  : 'hover:bg-purple-50'
-              }`}
+              className={`p-2 rounded transition-colors ${isBlurMode
+                ? 'bg-purple-100 hover:bg-purple-200'
+                : 'hover:bg-purple-50'
+                }`}
               title={isBlurMode ? '블러 모드 비활성화' : '블러 모드 활성화'}
             >
               {isBlurMode ? (
@@ -343,9 +342,8 @@ export function EditableAccommodationPage({
             <MapPin className="w-4 h-4 print:w-3.5 print:h-3.5 text-cyan-600" />
             <div className="flex items-center gap-2">
               <span
-                className={`text-gray-700 text-sm print:text-xs ${
-                  isEditMode ? 'cursor-pointer hover:text-cyan-600 hover:underline transition-colors' : ''
-                }`}
+                className={`text-gray-700 text-sm print:text-xs ${isEditMode ? 'cursor-pointer hover:text-cyan-600 hover:underline transition-colors' : ''
+                  }`}
                 style={getStyleObject(data?.accommodationLocationStyle)}
                 onClick={() => isEditMode && setIsEditing(true)}
               >
@@ -354,7 +352,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationLocationStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationLocationStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationLocationStyle: style })}
                   fieldKey="accommodationLocation"
                   backgroundColorClass="bg-white"
                 />
@@ -365,96 +363,96 @@ export function EditableAccommodationPage({
 
         {/* Images Grid */}
         <div data-blur-key={`accommodationImagesCard-${hotel.name}`} className="space-y-2 print:space-y-1.5">
-        <div className="grid grid-cols-3 gap-2.5 print:gap-2 h-[280px] print:h-[240px]">
-          <div 
-            className={`col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg relative group ${isEditMode ? 'cursor-pointer' : ''}`}
-            onClick={() => handleImageClick(0)}
-          >
-            <ImageWithControls
-              src={hotel.images[0]}
-              alt={`${hotel.name} - Main`}
-              className="w-full h-full object-cover"
-              objectFit={hotel.imageObjectFit?.[0] || 'cover'}
-              objectPosition={hotel.imageObjectPosition?.[0] || 'center'}
-            />
-            {isEditMode && (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
-                <ImageIcon className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            )}
+          <div className="grid grid-cols-3 gap-2.5 print:gap-2 h-[280px] print:h-[240px]">
+            <div
+              className={`col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-lg relative group ${isEditMode ? 'cursor-pointer' : ''}`}
+              onClick={() => handleImageClick(0)}
+            >
+              <ImageWithControls
+                src={hotel.images[0]}
+                alt={`${hotel.name} - Main`}
+                className="w-full h-full object-cover"
+                objectFit={hotel.imageObjectFit?.[0] || 'cover'}
+                objectPosition={hotel.imageObjectPosition?.[0] || 'center'}
+              />
+              {isEditMode && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
+                  <ImageIcon className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
+            <div
+              className={`col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
+              onClick={() => handleImageClick(1)}
+            >
+              <ImageWithControls
+                src={hotel.images[1]}
+                alt={`${hotel.name} - 2`}
+                className="w-full h-full object-cover"
+                objectFit={hotel.imageObjectFit?.[1] || 'cover'}
+                objectPosition={hotel.imageObjectPosition?.[1] || 'center'}
+              />
+              {isEditMode && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
+                  <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
+            <div
+              className={`col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
+              onClick={() => handleImageClick(2)}
+            >
+              <ImageWithControls
+                src={hotel.images[2]}
+                alt={`${hotel.name} - 3`}
+                className="w-full h-full object-cover"
+                objectFit={hotel.imageObjectFit?.[2] || 'cover'}
+                objectPosition={hotel.imageObjectPosition?.[2] || 'center'}
+              />
+              {isEditMode && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
+                  <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
           </div>
-          <div 
-            className={`col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
-            onClick={() => handleImageClick(1)}
-          >
-            <ImageWithControls
-              src={hotel.images[1]}
-              alt={`${hotel.name} - 2`}
-              className="w-full h-full object-cover"
-              objectFit={hotel.imageObjectFit?.[1] || 'cover'}
-              objectPosition={hotel.imageObjectPosition?.[1] || 'center'}
-            />
-            {isEditMode && (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
-                <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            )}
-          </div>
-          <div 
-            className={`col-span-1 row-span-1 rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
-            onClick={() => handleImageClick(2)}
-          >
-            <ImageWithControls
-              src={hotel.images[2]}
-              alt={`${hotel.name} - 3`}
-              className="w-full h-full object-cover"
-              objectFit={hotel.imageObjectFit?.[2] || 'cover'}
-              objectPosition={hotel.imageObjectPosition?.[2] || 'center'}
-            />
-            {isEditMode && (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
-                <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            )}
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-2.5 print:gap-2 h-[140px] print:h-[120px]">
-          <div 
-            className={`rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
-            onClick={() => handleImageClick(3)}
-          >
-            <ImageWithControls
-              src={hotel.images[3]}
-              alt={`${hotel.name} - 4`}
-              className="w-full h-full object-cover"
-              objectFit={hotel.imageObjectFit?.[3] || 'cover'}
-              objectPosition={hotel.imageObjectPosition?.[3] || 'center'}
-            />
-            {isEditMode && (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
-                <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            )}
+          <div className="grid grid-cols-2 gap-2.5 print:gap-2 h-[140px] print:h-[120px]">
+            <div
+              className={`rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
+              onClick={() => handleImageClick(3)}
+            >
+              <ImageWithControls
+                src={hotel.images[3]}
+                alt={`${hotel.name} - 4`}
+                className="w-full h-full object-cover"
+                objectFit={hotel.imageObjectFit?.[3] || 'cover'}
+                objectPosition={hotel.imageObjectPosition?.[3] || 'center'}
+              />
+              {isEditMode && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
+                  <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
+            <div
+              className={`rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
+              onClick={() => handleImageClick(4)}
+            >
+              <ImageWithControls
+                src={hotel.images[4]}
+                alt={`${hotel.name} - 5`}
+                className="w-full h-full object-cover"
+                objectFit={hotel.imageObjectFit?.[4] || 'cover'}
+                objectPosition={hotel.imageObjectPosition?.[4] || 'center'}
+              />
+              {isEditMode && (
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
+                  <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
+            </div>
           </div>
-          <div 
-            className={`rounded-xl overflow-hidden shadow-md relative group ${isEditMode ? 'cursor-pointer' : ''}`}
-            onClick={() => handleImageClick(4)}
-          >
-            <ImageWithControls
-              src={hotel.images[4]}
-              alt={`${hotel.name} - 5`}
-              className="w-full h-full object-cover"
-              objectFit={hotel.imageObjectFit?.[4] || 'cover'}
-              objectPosition={hotel.imageObjectPosition?.[4] || 'center'}
-            />
-            {isEditMode && (
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center print:hidden">
-                <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            )}
-          </div>
-        </div>
         </div>
 
         {/* Hotel Info */}
@@ -471,7 +469,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationHotelNameStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationHotelNameStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationHotelNameStyle: style })}
                   fieldKey="accommodationHotelName"
                   backgroundColorClass="bg-white"
                 />
@@ -486,7 +484,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationHotelTypeStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationHotelTypeStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationHotelTypeStyle: style })}
                   fieldKey="accommodationHotelType"
                   backgroundColorClass="bg-cyan-100"
                 />
@@ -508,7 +506,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationDescriptionStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationDescriptionStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationDescriptionStyle: style })}
                   fieldKey="accommodationDescription"
                   backgroundColorClass="bg-white"
                 />
@@ -531,7 +529,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationCheckInLabelStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationCheckInLabelStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationCheckInLabelStyle: style })}
                     fieldKey="accommodationCheckInLabel"
                     backgroundColorClass="bg-cyan-50"
                   />
@@ -548,7 +546,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationCheckInTimeStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationCheckInTimeStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationCheckInTimeStyle: style })}
                     fieldKey="accommodationCheckInTime"
                     backgroundColorClass="bg-cyan-50"
                   />
@@ -568,7 +566,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationCheckOutLabelStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationCheckOutLabelStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationCheckOutLabelStyle: style })}
                     fieldKey="accommodationCheckOutLabel"
                     backgroundColorClass="bg-yellow-50"
                   />
@@ -585,7 +583,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationCheckOutTimeStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationCheckOutTimeStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationCheckOutTimeStyle: style })}
                     fieldKey="accommodationCheckOutTime"
                     backgroundColorClass="bg-yellow-50"
                   />
@@ -603,7 +601,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationNightsStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationNightsStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationNightsStyle: style })}
                   fieldKey="accommodationNights"
                   backgroundColorClass="bg-cyan-500"
                 />
@@ -625,7 +623,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationRoomTypeLabelStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationRoomTypeLabelStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationRoomTypeLabelStyle: style })}
                     fieldKey="accommodationRoomTypeLabel"
                     backgroundColorClass="bg-white"
                   />
@@ -642,7 +640,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationRoomTypeStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationRoomTypeStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationRoomTypeStyle: style })}
                     fieldKey="accommodationRoomType"
                     backgroundColorClass="bg-white"
                   />
@@ -661,7 +659,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationBreakfastLabelStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationBreakfastLabelStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationBreakfastLabelStyle: style })}
                     fieldKey="accommodationBreakfastLabel"
                     backgroundColorClass="bg-white"
                   />
@@ -694,7 +692,7 @@ export function EditableAccommodationPage({
                 {isEditMode && (
                   <StylePicker
                     currentStyle={data?.accommodationBreakfastStatusStyle}
-                    onStyleChange={(style) => onStyleChange({ accommodationBreakfastStatusStyle: style })}
+                    onStyleChange={(style) => onStyleChange?.({ accommodationBreakfastStatusStyle: style })}
                     fieldKey="accommodationBreakfastStatus"
                     backgroundColorClass="bg-white"
                   />
@@ -715,7 +713,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationFacilitiesLabelStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationFacilitiesLabelStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationFacilitiesLabelStyle: style })}
                   fieldKey="accommodationFacilitiesLabel"
                   backgroundColorClass="bg-white"
                 />
@@ -735,7 +733,7 @@ export function EditableAccommodationPage({
               {isEditMode && hotel.facilities.length > 0 && (
                 <StylePicker
                   currentStyle={data?.accommodationFacilityItemStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationFacilityItemStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationFacilityItemStyle: style })}
                   fieldKey="accommodationFacilityItem"
                   backgroundColorClass="bg-cyan-50"
                 />
@@ -757,7 +755,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationAttractionsLabelStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationAttractionsLabelStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationAttractionsLabelStyle: style })}
                   fieldKey="accommodationAttractionsLabel"
                   backgroundColorClass="bg-white"
                 />
@@ -777,7 +775,7 @@ export function EditableAccommodationPage({
               {isEditMode && hotel.nearbyAttractions.length > 0 && (
                 <StylePicker
                   currentStyle={data?.accommodationAttractionItemStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationAttractionItemStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationAttractionItemStyle: style })}
                   fieldKey="accommodationAttractionItem"
                   backgroundColorClass="bg-yellow-50"
                 />
@@ -797,7 +795,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationCityTaxLabelStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationCityTaxLabelStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationCityTaxLabelStyle: style })}
                   fieldKey="accommodationCityTaxLabel"
                   backgroundColorClass="bg-white"
                 />
@@ -814,7 +812,7 @@ export function EditableAccommodationPage({
               {isEditMode && (
                 <StylePicker
                   currentStyle={data?.accommodationCityTaxStyle}
-                  onStyleChange={(style) => onStyleChange({ accommodationCityTaxStyle: style })}
+                  onStyleChange={(style) => onStyleChange?.({ accommodationCityTaxStyle: style })}
                   fieldKey="accommodationCityTax"
                   backgroundColorClass="bg-white"
                 />
@@ -1130,8 +1128,8 @@ export function EditableAccommodationPage({
               <Button variant="outline" onClick={handleImageCancel}>
                 취소
               </Button>
-              <Button 
-                onClick={handleImageSave} 
+              <Button
+                onClick={handleImageSave}
                 className="bg-cyan-600 hover:bg-cyan-700 text-white"
                 disabled={!imageUrl.trim()}
               >
@@ -1144,7 +1142,7 @@ export function EditableAccommodationPage({
 
       {/* Image Viewer Modal */}
       {viewingImageIndex !== null && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center print:hidden"
           onClick={() => setViewingImageIndex(null)}
         >
@@ -1183,7 +1181,7 @@ export function EditableAccommodationPage({
           )}
 
           {/* Image */}
-          <div 
+          <div
             className="max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-8"
             onClick={(e) => e.stopPropagation()}
           >
@@ -1202,4 +1200,4 @@ export function EditableAccommodationPage({
       )}
     </div>
   );
-}
+});

@@ -1,6 +1,6 @@
 import { Plane, Plus, Copy, Trash2, Eye, EyeOff } from 'lucide-react';
 import { TourData } from '../types/tour-data';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Button } from './ui/button';
 import { StylePicker } from './StylePicker';
 import { getStyleObject } from '../types/text-style';
@@ -22,12 +22,12 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function FlightDeparturePage({ 
-  data, 
-  isEditMode, 
-  onUpdate, 
-  onDuplicate, 
-  onDelete, 
+export const FlightDeparturePage = memo(function FlightDeparturePage({
+  data,
+  isEditMode,
+  onUpdate,
+  onDuplicate,
+  onDelete,
   canDelete,
   pageId = '',
   isBlurMode = false,
@@ -153,7 +153,7 @@ export function FlightDeparturePage({
       arrivalAirport: lastSegment.arrivalAirport,
       services: lastSegment.services || ''
     };
-    
+
     // 마지막 구간의 도착지를 경유 공항으로 변경
     const updatedSegments = [...editData.segments];
     updatedSegments[updatedSegments.length - 1] = {
@@ -161,7 +161,7 @@ export function FlightDeparturePage({
       arrivalAirport: '경유 공항',
       arrivalTime: ''
     };
-    
+
     handleUpdate('segments', [...updatedSegments, newSegment]);
   };
 
@@ -169,7 +169,7 @@ export function FlightDeparturePage({
   const hasMultipleSegments = segmentCount > 2;
 
   return (
-    <div 
+    <div
       className={`min-h-screen p-4 md:p-6 lg:p-8 py-12 md:py-16 print:min-h-0 print:py-10 print:px-12 relative blur-container`}
       data-has-blur={blurRegions.length > 0 ? "true" : undefined}
       onMouseEnter={() => setIsHovered(true)}
@@ -181,11 +181,10 @@ export function FlightDeparturePage({
           {onToggleBlurMode && (
             <button
               onClick={onToggleBlurMode}
-              className={`p-2 rounded transition-colors ${
-                isBlurMode
-                  ? 'bg-purple-100 hover:bg-purple-200'
-                  : 'hover:bg-purple-50'
-              }`}
+              className={`p-2 rounded transition-colors ${isBlurMode
+                ? 'bg-purple-100 hover:bg-purple-200'
+                : 'hover:bg-purple-50'
+                }`}
               title={isBlurMode ? '블러 모드 비활성화' : '블러 모드 활성화'}
             >
               {isBlurMode ? (
@@ -215,7 +214,7 @@ export function FlightDeparturePage({
           )}
         </div>
       )}
-      
+
       {/* Blur Overlay */}
       {onAddBlurRegion && onRemoveBlurRegion && (
         <BlurOverlay
@@ -227,7 +226,7 @@ export function FlightDeparturePage({
           onRemoveBlurRegion={onRemoveBlurRegion}
         />
       )}
-      
+
       <div className={`max-w-5xl mx-auto ${hasMultipleSegments ? 'space-y-6 print:space-y-4' : 'space-y-10 print:space-y-8'}`}>
         {/* Header */}
         <div className="text-center print:break-inside-avoid">
@@ -336,7 +335,7 @@ export function FlightDeparturePage({
                 <span className="text-gray-700">{data.flightDepartureConnectingLabel}</span>
               </label>
             </div>
-            
+
             {!editData.isDirect && (
               <button
                 onClick={addSegment}
@@ -371,7 +370,7 @@ export function FlightDeparturePage({
                       />
                     ) : (
                       <>
-                        <h3 
+                        <h3
                           className="text-cyan-700 font-bold text-[20px] cursor-pointer hover:bg-cyan-50 px-2 py-1 rounded transition-colors"
                           style={getStyleObject(data.flightDepartureSegmentTitleStyle)}
                           onClick={() => startEdit(`flightDepartureSegmentTitle-${index}`, !flight.isDirect && flight.segments.length >= 2 ? `${index + 1}구간` : data.flightDepartureSegmentTitle)}
@@ -417,7 +416,7 @@ export function FlightDeparturePage({
                         />
                       ) : (
                         <>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                             style={getStyleObject(data.flightDepartureLabelStyle)}
                             onClick={() => startEdit(`flightDepartureAirlineLabel-${index}`, data.flightDepartureAirlineLabel)}
@@ -435,7 +434,7 @@ export function FlightDeparturePage({
                         </>
                       )
                     ) : (
-                      <p 
+                      <p
                         className="text-gray-500 text-sm"
                         style={getStyleObject(data.flightDepartureLabelStyle)}
                       >
@@ -499,7 +498,7 @@ export function FlightDeparturePage({
                         />
                       ) : (
                         <>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                             style={getStyleObject(data.flightDepartureLabelStyle)}
                             onClick={() => startEdit(`flightDepartureDepartureLabel-${index}`, data.flightDepartureDepartureLabel)}
@@ -517,7 +516,7 @@ export function FlightDeparturePage({
                         </>
                       )
                     ) : (
-                      <p 
+                      <p
                         className="text-gray-500 text-sm"
                         style={getStyleObject(data.flightDepartureLabelStyle)}
                       >
@@ -598,7 +597,7 @@ export function FlightDeparturePage({
                           />
                         ) : (
                           <>
-                            <span 
+                            <span
                               className="text-sm px-4 py-1 bg-cyan-50 rounded-full text-cyan-600 whitespace-nowrap cursor-pointer hover:bg-cyan-100 transition-colors"
                               style={getStyleObject(data.flightDepartureDirectBadgeStyle)}
                               onClick={() => startEdit('flightDepartureDirectBadge', data.flightDepartureDirectBadge)}
@@ -643,7 +642,7 @@ export function FlightDeparturePage({
                         />
                       ) : (
                         <>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                             style={getStyleObject(data.flightDepartureLabelStyle)}
                             onClick={() => startEdit(`flightDepartureArrivalLabel-${index}`, data.flightDepartureArrivalLabel)}
@@ -661,7 +660,7 @@ export function FlightDeparturePage({
                         </>
                       )
                     ) : (
-                      <p 
+                      <p
                         className="text-gray-500 text-sm"
                         style={getStyleObject(data.flightDepartureLabelStyle)}
                       >
@@ -740,7 +739,7 @@ export function FlightDeparturePage({
                         />
                       ) : (
                         <>
-                          <h3 
+                          <h3
                             className={`text-gray-700 ${hasMultipleSegments ? 'text-sm' : ''} cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors`}
                             style={getStyleObject(data.flightDepartureServicesTitleStyle)}
                             onClick={() => startEdit(`flightDepartureServicesTitle-${index}`, data.flightDepartureServicesTitle)}
@@ -831,7 +830,7 @@ export function FlightDeparturePage({
                     />
                   ) : (
                     <>
-                      <span 
+                      <span
                         className="text-cyan-700 cursor-pointer hover:bg-cyan-100 px-2 py-1 rounded transition-colors"
                         style={getStyleObject(data.flightDepartureTransitLabelStyle)}
                         onClick={() => startEdit('flightDepartureTransitLabel', data.flightDepartureTransitLabel)}
@@ -904,7 +903,7 @@ export function FlightDeparturePage({
                 />
               ) : (
                 <>
-                  <h3 
+                  <h3
                     className={`text-yellow-800 ${hasMultipleSegments ? 'text-sm' : ''} cursor-pointer hover:bg-yellow-100 px-2 py-1 rounded transition-colors`}
                     style={getStyleObject(data.flightDepartureChecklistTitleStyle)}
                     onClick={() => startEdit('flightDepartureChecklistTitle', data.flightDepartureChecklistTitle)}
@@ -973,4 +972,4 @@ export function FlightDeparturePage({
       </div>
     </div>
   );
-}
+});

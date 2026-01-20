@@ -1,6 +1,6 @@
 import { Plane, Plus, Copy, Trash2, Eye, EyeOff } from 'lucide-react';
 import { TourData } from '../types/tour-data';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Button } from './ui/button';
 import { StylePicker } from './StylePicker';
 import { getStyleObject } from '../types/text-style';
@@ -22,12 +22,12 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function FlightArrivalPage({ 
-  data, 
-  isEditMode, 
-  onUpdate, 
-  onDuplicate, 
-  onDelete, 
+export const FlightArrivalPage = memo(function FlightArrivalPage({
+  data,
+  isEditMode,
+  onUpdate,
+  onDuplicate,
+  onDelete,
   canDelete,
   pageId = '',
   isBlurMode = false,
@@ -153,14 +153,14 @@ export function FlightArrivalPage({
       arrivalAirport: lastSegment.arrivalAirport,
       services: lastSegment.services || ''
     };
-    
+
     const updatedSegments = [...editData.segments];
     updatedSegments[updatedSegments.length - 1] = {
       ...lastSegment,
       arrivalAirport: '경유 공항',
       arrivalTime: ''
     };
-    
+
     handleUpdate('segments', [...updatedSegments, newSegment]);
   };
 
@@ -168,7 +168,7 @@ export function FlightArrivalPage({
   const hasMultipleSegments = segmentCount > 2;
 
   return (
-    <div 
+    <div
       className={`min-h-screen p-4 md:p-6 lg:p-8 py-12 md:py-16 print:py-10 print:px-12 relative blur-container`}
       data-has-blur={blurRegions.length > 0 ? "true" : undefined}
       onMouseEnter={() => setIsHovered(true)}
@@ -180,11 +180,10 @@ export function FlightArrivalPage({
           {onToggleBlurMode && (
             <button
               onClick={onToggleBlurMode}
-              className={`p-2 rounded transition-colors ${
-                isBlurMode
+              className={`p-2 rounded transition-colors ${isBlurMode
                   ? 'bg-purple-100 hover:bg-purple-200'
                   : 'hover:bg-purple-50'
-              }`}
+                }`}
               title={isBlurMode ? '블러 모드 비활성화' : '블러 모드 활성화'}
             >
               {isBlurMode ? (
@@ -335,7 +334,7 @@ export function FlightArrivalPage({
                 <span className="text-gray-700">{data.flightArrivalConnectingLabel}</span>
               </label>
             </div>
-            
+
             {!editData.isDirect && (
               <button
                 onClick={addSegment}
@@ -370,7 +369,7 @@ export function FlightArrivalPage({
                       />
                     ) : (
                       <>
-                        <h3 
+                        <h3
                           className="text-yellow-700 font-bold text-[20px] cursor-pointer hover:bg-yellow-50 px-2 py-1 rounded transition-colors"
                           style={getStyleObject(data.flightArrivalSegmentTitleStyle)}
                           onClick={() => startEdit(`flightArrivalSegmentTitle-${index}`, !flight.isDirect && flight.segments.length >= 2 ? `${index + 1}구간` : data.flightArrivalSegmentTitle)}
@@ -415,7 +414,7 @@ export function FlightArrivalPage({
                         />
                       ) : (
                         <>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                             style={getStyleObject(data.flightArrivalLabelStyle)}
                             onClick={() => startEdit(`flightArrivalAirlineLabel-${index}`, data.flightArrivalAirlineLabel)}
@@ -433,7 +432,7 @@ export function FlightArrivalPage({
                         </>
                       )
                     ) : (
-                      <p 
+                      <p
                         className="text-gray-500 text-sm"
                         style={getStyleObject(data.flightArrivalLabelStyle)}
                       >
@@ -496,7 +495,7 @@ export function FlightArrivalPage({
                         />
                       ) : (
                         <>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                             style={getStyleObject(data.flightArrivalLabelStyle)}
                             onClick={() => startEdit(`flightArrivalDepartureLabel-${index}`, data.flightArrivalDepartureLabel)}
@@ -514,7 +513,7 @@ export function FlightArrivalPage({
                         </>
                       )
                     ) : (
-                      <p 
+                      <p
                         className="text-gray-500 text-sm"
                         style={getStyleObject(data.flightArrivalLabelStyle)}
                       >
@@ -594,7 +593,7 @@ export function FlightArrivalPage({
                           />
                         ) : (
                           <>
-                            <span 
+                            <span
                               className="text-sm px-4 py-1 bg-yellow-50 rounded-full text-yellow-600 whitespace-nowrap cursor-pointer hover:bg-yellow-100 transition-colors"
                               style={getStyleObject(data.flightArrivalDirectBadgeStyle)}
                               onClick={() => startEdit('flightArrivalDirectBadge', data.flightArrivalDirectBadge)}
@@ -638,7 +637,7 @@ export function FlightArrivalPage({
                         />
                       ) : (
                         <>
-                          <p 
+                          <p
                             className="text-gray-500 text-sm cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors"
                             style={getStyleObject(data.flightArrivalLabelStyle)}
                             onClick={() => startEdit(`flightArrivalArrivalLabel-${index}`, data.flightArrivalArrivalLabel)}
@@ -656,7 +655,7 @@ export function FlightArrivalPage({
                         </>
                       )
                     ) : (
-                      <p 
+                      <p
                         className="text-gray-500 text-sm"
                         style={getStyleObject(data.flightArrivalLabelStyle)}
                       >
@@ -734,7 +733,7 @@ export function FlightArrivalPage({
                         />
                       ) : (
                         <>
-                          <h3 
+                          <h3
                             className={`text-gray-700 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded transition-colors ${hasMultipleSegments ? 'text-sm' : ''}`}
                             style={getStyleObject(data.flightArrivalServicesTitleStyle)}
                             onClick={() => startEdit(`flightArrivalServicesTitle-${index}`, data.flightArrivalServicesTitle)}
@@ -825,7 +824,7 @@ export function FlightArrivalPage({
                     />
                   ) : (
                     <>
-                      <span 
+                      <span
                         className="text-yellow-700 cursor-pointer hover:bg-yellow-100 px-2 py-1 rounded transition-colors"
                         style={getStyleObject(data.flightArrivalTransitLabelStyle)}
                         onClick={() => startEdit('flightArrivalTransitLabel', data.flightArrivalTransitLabel)}
@@ -898,7 +897,7 @@ export function FlightArrivalPage({
                 />
               ) : (
                 <>
-                  <h3 
+                  <h3
                     className={`text-cyan-800 cursor-pointer hover:bg-cyan-100 px-2 py-1 rounded transition-colors ${hasMultipleSegments ? 'text-sm' : ''}`}
                     style={getStyleObject(data.flightArrivalChecklistTitleStyle)}
                     onClick={() => startEdit('flightArrivalChecklistTitle', data.flightArrivalChecklistTitle)}
@@ -967,4 +966,4 @@ export function FlightArrivalPage({
       </div>
     </div>
   );
-}
+});

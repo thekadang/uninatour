@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar as CalendarComponent } from './ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { ko } from 'date-fns/locale';
 import { BlurRegion } from '../types/blur-region';
 import { BlurOverlay } from './BlurOverlay';
@@ -26,12 +26,12 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function IntroductionPage({ 
-  data, 
-  isEditMode, 
-  onUpdate, 
-  onDuplicate, 
-  onDelete, 
+export const IntroductionPage = memo(function IntroductionPage({
+  data,
+  isEditMode,
+  onUpdate,
+  onDuplicate,
+  onDelete,
   canDelete,
   pageId = '',
   isBlurMode = false,
@@ -51,10 +51,10 @@ export function IntroductionPage({
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const isoString = `${year}-${month}-${day}`;
-      
+
       onUpdate?.({ startDate: isoString });
       setIsStartDateOpen(false);
-      
+
       // Auto-calculate total days if both dates are set
       if (data.endDate) {
         const endParts = data.endDate.split('-');
@@ -73,10 +73,10 @@ export function IntroductionPage({
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const isoString = `${year}-${month}-${day}`;
-      
+
       onUpdate?.({ endDate: isoString });
       setIsEndDateOpen(false);
-      
+
       // Auto-calculate total days if both dates are set
       if (data.startDate) {
         const startParts = data.startDate.split('-');
@@ -106,20 +106,20 @@ export function IntroductionPage({
   };
 
   const travelInfo = [
-    { 
-      icon: Users, 
-      label: data.travelPartyLabel, 
-      value: data.travelParty, 
-      field: 'travelParty' as const, 
+    {
+      icon: Users,
+      label: data.travelPartyLabel,
+      value: data.travelParty,
+      field: 'travelParty' as const,
       labelField: 'travelPartyLabel' as const,
       labelStyle: data.travelPartyLabelStyle,
       valueStyle: data.travelPartyStyle
     },
-    { 
-      icon: Heart, 
-      label: data.travelThemeLabel, 
-      value: data.travelTheme, 
-      field: 'travelTheme' as const, 
+    {
+      icon: Heart,
+      label: data.travelThemeLabel,
+      value: data.travelTheme,
+      field: 'travelTheme' as const,
       labelField: 'travelThemeLabel' as const,
       labelStyle: data.travelThemeLabelStyle,
       valueStyle: data.travelThemeStyle
@@ -131,7 +131,7 @@ export function IntroductionPage({
     .filter(line => line.trim() !== '');
 
   return (
-    <div 
+    <div
       className="min-h-screen p-4 md:p-6 lg:p-8 py-12 md:py-16 print:py-10 print:px-12 relative blur-container"
       data-has-blur={blurRegions.length > 0 ? "true" : undefined}
       onMouseEnter={() => setIsHovered(true)}
@@ -274,7 +274,7 @@ export function IntroductionPage({
                       />
                     )}
                   </div>
-                  
+
                   {/* Editable Value */}
                   <div className="flex items-center gap-2">
                     <div data-blur-key={item.field}>
@@ -305,7 +305,7 @@ export function IntroductionPage({
               </div>
             </div>
           ))}
-          
+
           {/* Travel Period Card with Date Pickers */}
           <div data-blur-key="travelPeriodCard" className="bg-white rounded-2xl p-6 shadow-md border border-cyan-100 hover:shadow-lg transition-shadow print:break-inside-avoid">
             <div className="flex items-start gap-4">
@@ -361,9 +361,9 @@ export function IntroductionPage({
                           />
                         </PopoverContent>
                       </Popover>
-                      
+
                       <span className="text-gray-400">~</span>
-                      
+
                       <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className="text-left border-cyan-300 hover:border-cyan-500">
@@ -383,9 +383,9 @@ export function IntroductionPage({
                           />
                         </PopoverContent>
                       </Popover>
-                      
+
                       <span className="text-gray-400">|</span>
-                      
+
                       <Select
                         value={data.nights.toString()}
                         onValueChange={(value) => onUpdate?.({ nights: parseInt(value) })}
@@ -401,7 +401,7 @@ export function IntroductionPage({
                           ))}
                         </SelectContent>
                       </Select>
-                      
+
                       <Select
                         value={data.days.toString()}
                         onValueChange={(value) => onUpdate?.({ days: parseInt(value) })}
@@ -575,4 +575,4 @@ export function IntroductionPage({
       </div>
     </div>
   );
-}
+});

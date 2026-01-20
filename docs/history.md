@@ -2661,13 +2661,61 @@ newPage = {
 
 ---
 
-## 롤백 안내
+## History #51 ⭐
+**날짜**: 2026-01-16
+**사용자 질문**: GitHub Pages 배포 설정 및 비밀번호 환경변수화
 
-롤백이 필요한 경우:
-1. "History #N으로 롤백해줘" 형식으로 요청
-2. 해당 시점의 변경 파일 목록 확인
-3. 역순으로 파일 복원 진행
+### 수행한 작업
+- [x] `PasswordProtection.tsx`의 하드코딩된 비밀번호를 환경변수(`VITE_APP_PASSWORD`)로 전환
+- [x] `.env` 및 `.env.example` 파일 설정
+- [x] `package.json`에 `gh-pages` 의존성 추가 및 배포 스크립트(`predeploy`, `deploy`) 설정
+- [x] Git을 통한 배포 프로세스 확인
+
+### 변경된 파일
+| 파일 | 변경 내용 |
+|------|-----------|
+| 📝 `src/components/PasswordProtection.tsx` | 하드코딩된 비밀번호를 `import.meta.env.VITE_APP_PASSWORD`로 교체 |
+| 📄 `.env` | 신규 생성 (VITE_APP_PASSWORD 설정) |
+| 📄 `.env.example` | 신규 생성 (환경변수 템플릿) |
+| 📝 `package.json` | `gh-pages` 설치 및 배포 스크립트 추가 |
 
 ---
 
-*이 파일은 AI 작업 시 자동으로 업데이트됩니다.*
+## History #52 ⭐
+**날짜**: 2026-01-20
+**사용자 질문**: 지금부터 작업 시작할거야. 니가 지켜야할 것들을 다시한번 잘 상기해봐
+
+### 수행한 작업
+- [x] 컨텍스트 복구 및 프로젝트 구조 분석 (`docs/structure.md`, `claude.md`)
+- [x] 작업 이력 동기화 (`docs/history.md` 업데이트)
+- [x] `docs/task.md` 생성 및 초기화
+- [x] 서비스 전체 상태 점검
+
+### 현재 상태
+- GitHub Pages 배포 환경 구성 완료
+- 비밀번호 환경변수 관리 적용 완료
+- 프로젝트 구조 최적화 (Phase 1~5 중 일부 진행 중)
+
+---
+
+## 롤백 안내
+... (기존 내용 유지)
+---
+
+## History #53
+**날짜**: 2026-01-20
+**사용자 질문**: 구버전 파일과의 호환성 문제 해결 및 최적화 진행 전 복구포인트 설정
+
+### 수행한 작업
+- [x] 현재 소스 코드 상태 확인 (`git status` 결과 깨끗함)
+- [x] "새 폴더" 내의 레거시 JSON 파일 구조 분석
+- [x] 마이그레이션 로직 결함 확인 (다월 여행 시 날짜 오계산 문제)
+- [x] 최적화 및 호환성 수정을 위한 복구포인트(History #53) 설정
+
+### 현재 상태
+- Git Branch: `checkpoint/v2-completion-260116지지`
+- 상태: 모든 파일 커밋 완료됨. 안전하게 수정 가능.
+
+### 참조한 문서
+- `docs/optimization-plan.md`
+- `src/hooks/useTourData.ts`

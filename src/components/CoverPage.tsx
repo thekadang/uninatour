@@ -4,7 +4,7 @@ import { TourData } from '../types/tour-data';
 import { getStyleObject } from '../types/text-style';
 import { StylePicker } from './StylePicker';
 import { Button } from './ui/button';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { BlurRegion } from '../types/blur-region';
 import { BlurOverlay } from './BlurOverlay';
 
@@ -23,12 +23,12 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function CoverPage({ 
-  data, 
-  isEditMode, 
-  onUpdate, 
-  onDuplicate, 
-  onDelete, 
+export const CoverPage = memo(function CoverPage({
+  data,
+  isEditMode,
+  onUpdate,
+  onDuplicate,
+  onDelete,
   canDelete,
   pageId = '',
   isBlurMode = false,
@@ -42,11 +42,10 @@ export function CoverPage({
 
   return (
     <div
-      className={`flex flex-col items-center p-4 md:p-6 lg:p-8 py-12 md:py-16 pb-24 md:pb-28 lg:pb-32 relative overflow-hidden print:py-10 print:px-12 print:pb-12 blur-container ${
-        isBlurMode || blurRegions.length > 0
-          ? 'justify-start overflow-auto'
-          : 'min-h-screen justify-center'
-      }`}
+      className={`flex flex-col items-center p-4 md:p-6 lg:p-8 py-12 md:py-16 pb-24 md:pb-28 lg:pb-32 relative overflow-hidden print:py-10 print:px-12 print:pb-12 blur-container ${isBlurMode || blurRegions.length > 0
+        ? 'justify-start overflow-auto'
+        : 'min-h-screen justify-center'
+        }`}
       style={isBlurMode || blurRegions.length > 0 ? { height: '297mm', minHeight: '297mm' } : undefined}
       data-blur-mode={isBlurMode ? "true" : undefined}
       data-has-blur={blurRegions.length > 0 ? "true" : undefined}
@@ -295,4 +294,4 @@ export function CoverPage({
       </div>
     </div>
   );
-}
+});

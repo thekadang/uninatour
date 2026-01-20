@@ -1,7 +1,7 @@
 import { Plane, Train, Car, Bus, Edit2, Trash2, Copy, Eye, EyeOff } from 'lucide-react';
 import { TourData } from '../types/tour-data';
 import { getWeeksBetween, formatDateKorean } from '../utils/date-parser';
-import { useState } from 'react';
+import { useState, memo, useMemo, useCallback } from 'react';
 import { Button } from './ui/button';
 import { StylePicker } from './StylePicker';
 import { getStyleObject } from '../types/text-style';
@@ -30,7 +30,7 @@ interface Props {
   onRemoveBlurRegion?: (regionId: string) => void;
 }
 
-export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate, onDelete, canDelete, pageId, isBlurMode, blurRegions, onToggleBlurMode, onAddBlurRegion, onRemoveBlurRegion }: Props) {
+export const ItineraryCalendarPage = memo(function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate, onDelete, canDelete, pageId, isBlurMode, blurRegions, onToggleBlurMode, onAddBlurRegion, onRemoveBlurRegion }: Props) {
   const [editingDay, setEditingDay] = useState<DayData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -66,9 +66,9 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
 
   const itinerary = data.itinerary || [];
 
-  const getCountryBadgeColor = (country: string) => {
+  const getCountryBadgeColor = useCallback((country: string) => {
     return data.countryColors?.[country] || 'bg-gray-500';
-  };
+  }, [data.countryColors]);
 
   // Check if dates are available
   if (!data.startDate || !data.endDate) {
@@ -93,31 +93,31 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
   const endDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
 
   // Get weeks from departure week to arrival week
-  const weeks = getWeeksBetween(startDate, endDate);
+  const weeks = useMemo(() => getWeeksBetween(startDate, endDate), [startDate, endDate]);
 
   // Format date range for display
   const nightsDaysText = data.nights > 0 && data.days > 0 ? ` (${data.nights}박 ${data.days}일)` : '';
   const dateRangeText = `${formatDateKorean(startDate)} ~ ${formatDateKorean(endDate)}${nightsDaysText}`;
 
   // Calculate day number for a given date
-  const getDayNum = (date: Date): number => {
+  const getDayNum = useCallback((date: Date): number => {
     const diffTime = date.getTime() - startDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     return diffDays + 1;
-  };
+  }, [startDate]);
 
   const handleDayClick = (day: DayData) => {
     if (!isEditMode || !onUpdate) return;
     setEditingDay(day);
   };
 
-  const handleDayClickWrapper = (e: React.MouseEvent, day: DayData) => {
+  const handleDayClickWrapper = useCallback((e: React.MouseEvent, day: DayData) => {
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('[role="button"]')) {
       return;
     }
     handleDayClick(day);
-  };
+  }, [isEditMode, onUpdate]);
 
   const handleDelete = () => {
     if (!editingDay || !onUpdate) return;
@@ -132,7 +132,7 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
   };
 
   // Get unique countries for legend - only from items that are actually displayed in trip period
-  const uniqueCountries = Array.from(new Set(
+  const uniqueCountries = useMemo(() => Array.from(new Set(
     itinerary
       .filter(item => {
         // Check if this item's date falls within the trip period
@@ -147,7 +147,7 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
         return itemDate >= startDate && itemDate <= endDate;
       })
       .map(item => item.country)
-  ));
+  )), [itinerary, startDate, endDate]);
 
   return (
     <div
@@ -315,7 +315,7 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
 
         {/* Mobile List View */}
         <div className="md:hidden print:hidden space-y-2">
-          {(() => {
+          {useMemo(() => {
             const tripDays: DayData[] = [];
             weeks.forEach((week) => {
               for (let i = 0; i < 7; i++) {
@@ -355,7 +355,7 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
                 getCountryBadgeColor={getCountryBadgeColor}
               />
             ));
-          })()}
+          }, [weeks, startDate, endDate, itinerary, isEditMode, getDayNum, getCountryBadgeColor])}
         </div>
 
         {/* Desktop Calendar View */}
@@ -384,7 +384,7 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
             ))}
 
             {/* Calendar Days */}
-            {(() => {
+            {useMemo(() => {
               const allDays: DayData[] = [];
               weeks.forEach((week) => {
                 for (let i = 0; i < 7; i++) {
@@ -449,7 +449,7 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
                   />
                 );
               });
-            })()}
+            }, [weeks, startDate, endDate, itinerary, isEditMode, onUpdate, handleDayClickWrapper, getCountryBadgeColor, data, getDayNum])}
           </div>
         </div>
 
@@ -505,4 +505,4 @@ export function ItineraryCalendarPage({ data, isEditMode, onUpdate, onDuplicate,
       </div>
     </div>
   );
-}
+});
