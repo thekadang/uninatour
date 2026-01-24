@@ -122,9 +122,28 @@ export const ItineraryCalendarPage = memo(function ItineraryCalendarPage({ data,
   const handleDelete = () => {
     if (!editingDay || !onUpdate) return;
 
+    // Standard format: YYYY-MM-DD
     const dateStr = `${editingDay.date.getFullYear()}-${String(editingDay.date.getMonth() + 1).padStart(2, '0')}-${String(editingDay.date.getDate()).padStart(2, '0')}`;
+    // Loose format: YYYY-M-D
+    const dateStrLoose = `${editingDay.date.getFullYear()}-${editingDay.date.getMonth() + 1}-${editingDay.date.getDate()}`;
+
+    const dayNum = editingDay.date.getDate();
+    const isStartMonth = editingDay.date.getMonth() === startDate.getMonth() && editingDay.date.getFullYear() === startDate.getFullYear();
+
     const newItinerary = itinerary.filter(
-      item => item.date !== dateStr
+      item => {
+        // String date comparison
+        if (typeof item.date === 'string') {
+          return item.date !== dateStr && item.date !== dateStrLoose;
+        }
+        // Numeric date comparison (Legacy)
+        if (typeof item.date === 'number') {
+          if (isStartMonth && item.date === dayNum) {
+            return false; // Remove this item
+          }
+        }
+        return true;
+      }
     );
 
     onUpdate({ itinerary: newItinerary });
