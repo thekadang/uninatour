@@ -1,4 +1,4 @@
-import { Plane, Train, Car, Bus } from 'lucide-react';
+import { Plane, Train, Car, Bus, Ship } from 'lucide-react';
 import React from 'react';
 
 export interface DayData {
@@ -9,7 +9,7 @@ export interface DayData {
     tripData?: {
         country: string;
         city: string;
-        transport: 'plane' | 'train' | 'car' | 'bus' | null;
+        transport: 'plane' | 'train' | 'car' | 'bus' | 'ship' | null;
     };
 }
 
@@ -23,6 +23,8 @@ export const getTransportIcon = (transport: string | null) => {
             return React.createElement(Car, { className: "w-3.5 h-3.5 print:w-3 print:h-3" });
         case 'bus':
             return React.createElement(Bus, { className: "w-3.5 h-3.5 print:w-3 print:h-3" });
+        case 'ship':
+            return React.createElement(Ship, { className: "w-3.5 h-3.5 print:w-3 print:h-3" });
         default:
             return null;
     }

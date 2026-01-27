@@ -1,4 +1,4 @@
-import { Plane, Train, Car, Bus, Trash2 } from 'lucide-react';
+import { Plane, Train, Car, Bus, Trash2, Ship } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 interface Props {
     editingDay: DayData | null;
     onClose: () => void;
-    onSave: (data: { country: string; city: string; transport: 'plane' | 'train' | 'car' | 'bus' | 'none'; color: string }) => void;
+    onSave: (data: { country: string; city: string; transport: 'plane' | 'train' | 'car' | 'bus' | 'ship' | 'none'; color: string }) => void;
     onDelete: () => void;
     countryColors?: Record<string, string>;
 }
@@ -18,7 +18,7 @@ interface Props {
 export function ItineraryEditDialog({ editingDay, onClose, onSave, onDelete, countryColors }: Props) {
     const [editCountry, setEditCountry] = useState('');
     const [editCity, setEditCity] = useState('');
-    const [editTransport, setEditTransport] = useState<'plane' | 'train' | 'car' | 'bus' | 'none'>('none');
+    const [editTransport, setEditTransport] = useState<'plane' | 'train' | 'car' | 'bus' | 'ship' | 'none'>('none');
     const [editCountryColor, setEditCountryColor] = useState('bg-blue-500');
 
     useEffect(() => {
@@ -125,6 +125,12 @@ export function ItineraryEditDialog({ editingDay, onClose, onSave, onDelete, cou
                                     <div className="flex items-center gap-2">
                                         <Bus className="w-4 h-4" />
                                         버스
+                                    </div>
+                                </SelectItem>
+                                <SelectItem value="ship">
+                                    <div className="flex items-center gap-2">
+                                        <Ship className="w-4 h-4" />
+                                        크루즈(배)
                                     </div>
                                 </SelectItem>
                             </SelectContent>

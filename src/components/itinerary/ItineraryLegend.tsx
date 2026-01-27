@@ -1,4 +1,4 @@
-import { Plane, Train, Car, Bus } from 'lucide-react';
+import { Plane, Train, Car, Bus, Ship } from 'lucide-react';
 import { TourData } from '../../types/tour-data';
 import { getStyleObject } from '../../types/text-style';
 import { StylePicker } from '../StylePicker';
@@ -35,6 +35,7 @@ export function ItineraryLegend({
         { icon: Train, label: '기차', key: 'train' },
         { icon: Car, label: '렌터카', key: 'car' },
         { icon: Bus, label: '버스', key: 'bus' },
+        { icon: Ship, label: '크루즈(배)', key: 'ship' },
     ];
 
     return (
